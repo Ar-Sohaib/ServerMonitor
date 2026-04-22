@@ -1,0 +1,13 @@
+# User config (contains server IPs and credentials)
+servers.yml
+
+# SSH keys
+keys/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment
+.env
