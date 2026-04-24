@@ -5,10 +5,8 @@ services:
     ports:
       - "${MONITOR_PORT:-8080}:8080"
     volumes:
-      # SSH polling config — copy servers.example.yml → servers.yml first
       - ./servers.yml:/app/servers.yml:ro
-      # SSH private keys — put your key files in ./keys/
-      - ./keys:/keys:ro
+      - ./keys/monitoring_ed25519:/keys/monitoring_ed25519:ro
     environment:
       MONITOR_PORT: "${MONITOR_PORT:-8080}"
       MONITOR_HOST: "0.0.0.0"
@@ -16,8 +14,7 @@ services:
       COLLECT_INTERVAL: "30"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python3", "-c",
-             "import urllib.request; urllib.request.urlopen('http://localhost:8080/api/servers')"]
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/api/servers')"]
       interval: 30s
       timeout: 5s
       retries: 3
