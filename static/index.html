@@ -320,6 +320,39 @@
     }
     .chart-wrap canvas { height: 110px !important; }
 
+    /* ── Sensor / fan tables ── */
+    .sensor-section { margin-bottom: 1.25rem; }
+    .sensor-section h3 {
+      font-size: 0.72rem; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 0.5rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .sensor-section h3::before {
+      content: ''; display: inline-block;
+      width: 3px; height: 12px; border-radius: 2px;
+    }
+    .sensor-section.s-temps h3::before { background: var(--red); }
+    .sensor-section.s-fans  h3::before { background: var(--blue); }
+    .sensor-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+      gap: 0.35rem;
+    }
+    .sensor-item {
+      background: #0d1117; border: 1px solid var(--border); border-radius: 6px;
+      padding: 0.45rem 0.65rem;
+      display: flex; align-items: center; justify-content: space-between; gap: 0.4rem;
+    }
+    .sensor-item .s-lbl {
+      font-size: 0.7rem; color: var(--muted);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;
+    }
+    .sensor-item .s-val {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.8rem; font-weight: 700; white-space: nowrap; flex-shrink: 0;
+    }
+
     /* ── Utilities ── */
     .green  { color: var(--green) !important; }
     .yellow { color: var(--yellow) !important; }
@@ -373,6 +406,7 @@
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-stats" id="modal-stats"></div>
+    <div id="modal-sensors"></div>
     <div id="modal-charts"></div>
   </div>
 </div>
@@ -381,6 +415,7 @@
 // ═══════════════════════════════════════════════════════════════════
 // Constants & state
 // ═══════════════════════════════════════════════════════════════════
+
 
 const R = 38; // SVG gauge radius
 const CIRC = 2 * Math.PI * R;
@@ -397,6 +432,55 @@ const state = {
 // ═══════════════════════════════════════════════════════════════════
 // Colour helpers
 // ═══════════════════════════════════════════════════════════════════
+
+// ── Best temperature picker (Package > Tdie/Tctl > first available) ───────
+function getBestTemp(data) {
+  if (data.temps && Object.keys(data.temps).length) {
+    for (const [k, v] of Object.entries(data.temps))
+      if (/package/i.test(k)) return { val: v, label: k.split('/').slice(1).join('/') || k };
+    for (const [k, v] of Object.entries(data.temps))
+      if (/tdie|tctl/i.test(k)) return { val: v, label: k.split('/').slice(1).join('/') || k };
+    const [k, v] = Object.entries(data.temps)[0];
+    return { val: v, label: k.split('/').slice(1).join('/') || k };
+  }
+  if (data.cpu_temp != null) return { val: data.cpu_temp, label: 'CPU' };
+  return null;
+}
+
+// ── Sensor / fan table in the modal ───────────────────────────────────────
+function renderModalSensors(data) {
+  const div = document.getElementById('modal-sensors');
+  if (!div || !data) return;
+  const hasTemps = data.temps && Object.keys(data.temps).length;
+  const hasFans  = data.fans  && Object.keys(data.fans).length;
+  if (!hasTemps && !hasFans) { div.innerHTML = ''; return; }
+
+  let html = '';
+  if (hasTemps) {
+    const items = Object.entries(data.temps).map(([k, v]) => {
+      const label = k.split('/').slice(1).join('/') || k;
+      return `<div class="sensor-item">
+        <span class="s-lbl" title="${escHtml(k)}">${escHtml(label)}</span>
+        <span class="s-val" style="color:${tempColor(v)}">${v}°C</span>
+      </div>`;
+    }).join('');
+    html += `<div class="sensor-section s-temps"><h3>Températures</h3>
+      <div class="sensor-grid">${items}</div></div>`;
+  }
+  if (hasFans) {
+    const items = Object.entries(data.fans).map(([k, rpm]) => {
+      const label = k.split('/').slice(1).join('/') || k;
+      const col = rpm === 0 ? 'var(--muted)' : rpm < 600 ? 'var(--yellow)' : 'var(--blue)';
+      return `<div class="sensor-item">
+        <span class="s-lbl" title="${escHtml(k)}">${escHtml(label)}</span>
+        <span class="s-val" style="color:${col}">${rpm} rpm</span>
+      </div>`;
+    }).join('');
+    html += `<div class="sensor-section s-fans"><h3>Ventilateurs</h3>
+      <div class="sensor-grid">${items}</div></div>`;
+  }
+  div.innerHTML = html;
+}
 
 function pctColor(v) {
   return v < 60 ? '#3fb950' : v < 80 ? '#d29922' : '#f85149';
@@ -528,7 +612,6 @@ function buildCardHTML(sid, data) {
   const ramSub  = `${(data.ram_used_gb??0).toFixed(1)}/${(data.ram_total_gb??0).toFixed(1)}G`;
   const cpuSub  = `${data.cpu_cores ?? '?'}c`;
   const gpus    = data.gpus;
-  const temp    = data.cpu_temp;
 
   let gaugesHTML = `
     <div class="gauge-wrap">${buildGaugeSVG(`${sid}-cpu`, 'CPU', cpuPct, cpuSub)}</div>
@@ -540,8 +623,9 @@ function buildCardHTML(sid, data) {
     gaugesHTML += `<div class="gauge-wrap">${buildGaugeSVG(`${sid}-gpu`, 'GPU', g.util??0, gpuSub)}</div>`;
   }
 
-  const tempHTML = temp != null
-    ? `<span class="temp-badge" style="color:${tempColor(temp)}">${temp}°C</span>`
+  const bestTemp = getBestTemp(data);
+  const tempHTML = bestTemp
+    ? `<span class="temp-badge" style="color:${tempColor(bestTemp.val)}" title="${escHtml(bestTemp.label)}">${bestTemp.val}°C</span>`
     : '<span></span>';
 
   const hasGpu = gpus?.length > 0;
@@ -606,11 +690,15 @@ function updateCard(sid, data) {
       `${(g.mem_used_gb??0).toFixed(1)}/${(g.mem_total_gb??0).toFixed(1)}G`);
   }
 
-  // Temperature
+  // Temperature — pick the best labeled sensor
   const tempBadge = card.querySelector('.temp-badge');
-  if (tempBadge && data.cpu_temp != null) {
-    tempBadge.textContent = `${data.cpu_temp}°C`;
-    tempBadge.style.color = tempColor(data.cpu_temp);
+  if (tempBadge) {
+    const best = getBestTemp(data);
+    if (best) {
+      tempBadge.textContent = `${best.val}°C`;
+      tempBadge.style.color = tempColor(best.val);
+      tempBadge.title = best.label;
+    }
   }
 
   // "Updated X ago" — updated every tick by the clock
@@ -765,6 +853,7 @@ async function openModal(sid) {
     (latest?.gpus?.length ? ` · GPU: ${latest.gpus[0].name}` : '');
 
   updateModalStats(sid, latest);
+  renderModalSensors(latest);
 
   const labels = history.map(d => fmtTs(d.timestamp));
   const cpuVals  = history.map(d => d.cpu_percent ?? 0);
@@ -855,13 +944,14 @@ function updateModalStats(sid, data) {
   const statsDiv = document.getElementById('modal-stats');
   if (!statsDiv) return;
 
+  const best = getBestTemp(data);
   const boxes = [
     { val: `${data.cpu_percent??0}%`, lbl: 'CPU', cls: pctClass(data.cpu_percent??0) },
     { val: `${data.ram_percent??0}%`, lbl: `RAM (${(data.ram_used_gb??0).toFixed(1)}/${(data.ram_total_gb??0).toFixed(1)} GB)`, cls: pctClass(data.ram_percent??0) },
   ];
-  if (data.cpu_temp != null) {
-    const tc = data.cpu_temp < 50 ? 'green' : data.cpu_temp < 70 ? 'yellow' : 'red';
-    boxes.push({ val: `${data.cpu_temp}°C`, lbl: 'Température', cls: tc });
+  if (best) {
+    const tc = best.val < 50 ? 'green' : best.val < 70 ? 'yellow' : 'red';
+    boxes.push({ val: `${best.val}°C`, lbl: best.label, cls: tc });
   }
   if (data.gpus?.length) {
     const g = data.gpus[0];
@@ -870,6 +960,10 @@ function updateModalStats(sid, data) {
       const gc = g.temp < 70 ? 'green' : g.temp < 85 ? 'yellow' : 'red';
       boxes.push({ val: `${g.temp}°C`, lbl: 'Temp GPU', cls: gc });
     }
+    if (g.fan_pct != null) {
+      const fc = g.fan_pct < 50 ? 'green' : g.fan_pct < 80 ? 'yellow' : 'red';
+      boxes.push({ val: `${g.fan_pct}%`, lbl: 'Fan GPU', cls: fc });
+    }
   }
 
   statsDiv.innerHTML = boxes.map(b => `
@@ -877,6 +971,9 @@ function updateModalStats(sid, data) {
       <div class="stat-val ${b.cls}">${escHtml(b.val)}</div>
       <div class="stat-lbl">${escHtml(b.lbl)}</div>
     </div>`).join('');
+
+  // Live-update sensor table in case data arrived after modal was opened
+  renderModalSensors(data);
 }
 
 function closeModal() {

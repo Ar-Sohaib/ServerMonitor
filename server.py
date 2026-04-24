@@ -44,6 +44,8 @@ class Metrics(BaseModel):
     ram_used_gb: float
     ram_total_gb: float
     cpu_temp: Optional[float] = None
+    temps: Optional[dict] = None   # all labeled temperature sensors from hwmon
+    fans: Optional[dict] = None    # all fan RPMs from hwmon
     gpus: Optional[list[Any]] = None
 
 
@@ -87,7 +89,7 @@ def list_servers():
     return {
         sid: {
             **info,
-            "online": (now - info["last_seen"]) < 120,
+            "online": (now - info["last_seen"]) < 150,
             "latest": metrics_store[sid][-1] if metrics_store[sid] else None,
         }
         for sid, info in server_registry.items()
