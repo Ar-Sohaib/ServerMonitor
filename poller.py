@@ -71,7 +71,7 @@ def cpu_cores():
     return n or 1
 
 def hwmon_sensors():
-    temps, fans = {}, {}
+    temps, fans, fan_percentages = {}, {}, {}
     base = '/sys/class/hwmon'
     try:
         for dev in sorted(os.listdir(base)):
@@ -109,12 +109,21 @@ def hwmon_sensors():
                             label = open(os.path.join(path, f'fan{num}_label')).read().strip()
                         except Exception:
                             label = f'fan{num}'
-                        fans[f'{name}/{label}'] = rpm
+                        key = f'{name}/{label}'
+                        fans[key] = rpm
+                        pwm_path = os.path.join(path, f'pwm{num}')
+                        if os.path.exists(pwm_path):
+                            try:
+                                pwm_raw = float(open(pwm_path).read().strip())
+                                if 0 <= pwm_raw <= 255:
+                                    fan_percentages[key] = round(pwm_raw / 255 * 100, 1)
+                            except Exception:
+                                pass
                     except Exception:
                         pass
     except Exception:
         pass
-    return temps or None, fans or None
+    return temps or None, fans or None, fan_percentages or None
 
 def gpu_info():
     try:
@@ -149,7 +158,7 @@ def gpu_info():
     except Exception:
         return None
 
-temps, fans = hwmon_sensors()
+temps, fans, fan_percentages = hwmon_sensors()
 ram_pct, ram_used, ram_total = mem_info()
 print(json.dumps({
     'hostname':    socket.gethostname(),
@@ -161,6 +170,7 @@ print(json.dumps({
     'ram_total_gb':ram_total,
     'temps':       temps,
     'fans':        fans,
+    'fan_percentages': fan_percentages,
     'gpus':        gpu_info(),
 }))
 """
@@ -305,6 +315,7 @@ class ServerPoller:
             "cpu_temp":     cpu_temp,
             "temps":        data.get("temps"),
             "fans":         data.get("fans"),
+            "fan_percentages": data.get("fan_percentages"),
             "gpus":         data.get("gpus"),
         }
 
@@ -318,6 +329,9 @@ class ServerPoller:
         if data.get("fans"):
             rpms = list(data["fans"].values())
             parts.append(f"fans={','.join(str(r) for r in rpms[:2])}rpm")
+        if data.get("fan_percentages"):
+            fan_pcts = list(data["fan_percentages"].values())
+            parts.append(f"fan%={','.join(str(round(p)) for p in fan_pcts[:2])}%")
         if data.get("gpus"):
             g = data["gpus"][0]
             parts.append(f"GPU={g['util']}%")

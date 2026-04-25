@@ -85,6 +85,32 @@ def get_cpu_temperature() -> float | None:
     return None
 
 
+def get_fan_metrics() -> dict | None:
+    """Return labeled fan RPMs when exposed by psutil."""
+    try:
+        fans = psutil.sensors_fans()
+        if not fans:
+            return None
+
+        metrics = {}
+        for chip, readings in fans.items():
+            for idx, reading in enumerate(readings, start=1):
+                label = getattr(reading, "label", None) or f"fan{idx}"
+                current = getattr(reading, "current", None)
+                if current is None:
+                    continue
+                try:
+                    rpm = int(current)
+                except (TypeError, ValueError):
+                    continue
+                if rpm < 0:
+                    continue
+                metrics[f"{chip}/{label}"] = rpm
+        return metrics or None
+    except Exception:
+        return None
+
+
 def collect() -> dict:
     cpu = psutil.cpu_percent(interval=1)
     mem = psutil.virtual_memory()
@@ -100,6 +126,8 @@ def collect() -> dict:
         "ram_used_gb": round(mem.used / 1024**3, 2),
         "ram_total_gb": round(mem.total / 1024**3, 2),
         "cpu_temp": get_cpu_temperature(),
+        "fans": get_fan_metrics(),
+        "fan_percentages": None,
         "gpus": get_gpu_metrics(),
     }
     return payload

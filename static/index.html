@@ -7,941 +7,2269 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <style>
     :root {
-      --bg:       #0d1117;
-      --surface:  #161b22;
-      --surface2: #1c2128;
-      --border:   #30363d;
-      --text:     #e6edf3;
-      --muted:    #7d8590;
-      --green:    #3fb950;
-      --yellow:   #d29922;
-      --red:      #f85149;
-      --blue:     #58a6ff;
-      --purple:   #bc8cff;
-      --radius:   10px;
+      --bg-page: #070b14;
+      --bg-sidebar: #090d18;
+      --bg-panel: rgba(15, 23, 42, 0.78);
+      --bg-panel-hover: rgba(20, 31, 56, 0.9);
+      --bg-panel-solid: #0f1728;
+      --bg-panel-solid-2: #0b1220;
+      --border-soft: rgba(148, 163, 184, 0.12);
+      --border-strong: rgba(148, 163, 184, 0.22);
+      --text-primary: #e5edf8;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --metric-cpu: #38bdf8;
+      --metric-ram: #a78bfa;
+      --metric-gpu: #22c55e;
+      --metric-vram: #f59e0b;
+      --metric-temp: #f43f5e;
+      --status-ok: #22c55e;
+      --status-warning: #f59e0b;
+      --status-critical: #ef4444;
+      --status-offline: #64748b;
+      --green: #22c55e;
+      --yellow: #f59e0b;
+      --red: #ef4444;
+      --blue: #38bdf8;
+      --cyan: #22d3ee;
+      --purple: #a78bfa;
+      --pink: #f43f5e;
+      --shadow: 0 18px 50px rgba(2, 8, 23, 0.36);
+      --radius: 18px;
+      --radius-sm: 14px;
+      --text: var(--text-primary);
+      --muted: var(--text-muted);
+      --border: var(--border-soft);
+      --panel-3: var(--bg-panel-solid-2);
+      --panel: var(--bg-panel);
+      --panel-2: var(--bg-panel-hover);
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+
+    html {
+      scroll-behavior: smooth;
+    }
 
     body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      font-size: 14px;
+      min-height: 100vh;
+      color: var(--text-primary);
+      font: 13px/1.45 Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(96, 165, 250, 0.14), transparent 24%),
+        radial-gradient(circle at top right, rgba(167, 139, 250, 0.11), transparent 22%),
+        linear-gradient(180deg, #070b14 0%, #0a101d 42%, #09121f 100%);
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(148, 163, 184, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.035) 1px, transparent 1px);
+      background-size: 28px 28px;
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.45), transparent);
+    }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
       min-height: 100vh;
     }
 
-    /* ── Header ── */
-    header {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.65rem 1.25rem;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
+    .sidebar {
       position: sticky;
       top: 0;
-      z-index: 100;
+      height: 100vh;
+      padding: 18px 16px;
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border-soft);
+      backdrop-filter: blur(14px);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
     }
-    .logo {
-      display: flex; align-items: center; gap: 0.4rem;
-      font-weight: 700; font-size: 1rem; color: var(--blue);
-      letter-spacing: 0.04em; white-space: nowrap;
-    }
-    .logo svg { width: 20px; height: 20px; }
-    #server-count {
-      background: #1c2128; border: 1px solid var(--border);
-      border-radius: 20px; padding: 0.15rem 0.55rem;
-      font-size: 0.72rem; color: var(--muted);
-    }
-    #alert-banner {
-      display: none; align-items: center; gap: 0.4rem;
-      background: #3d1c1c; border: 1px solid #672a2a;
-      border-radius: 6px; padding: 0.2rem 0.6rem;
-      font-size: 0.72rem; color: var(--red); font-weight: 600;
-    }
-    #alert-banner.visible { display: flex; }
-    #clock {
-      margin-left: auto;
-      font-family: 'SF Mono','Fira Code',monospace;
-      font-size: 0.78rem; color: var(--muted);
-    }
-    #ws-badge {
-      padding: 0.2rem 0.6rem; border-radius: 20px;
-      font-size: 0.72rem; font-weight: 600; transition: all 0.3s;
-    }
-    #ws-badge.connected    { background: #1a4031; color: var(--green); }
-    #ws-badge.disconnected { background: #3d1c1c; color: var(--red); }
-    #ws-badge.connecting   { background: #2d2a1c; color: var(--yellow); }
 
-    /* ── Grid ── */
-    main { padding: 1.25rem; }
-    #server-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 1rem;
-    }
-    .empty-state {
-      grid-column: 1/-1; text-align: center;
-      color: var(--muted); padding: 5rem 2rem;
-      font-size: 0.9rem; line-height: 1.8;
-    }
-    .empty-state strong { color: var(--text); display: block; font-size: 1.1rem; margin-bottom: 0.5rem; }
-
-    /* ── Card ── */
-    .server-card {
-      background: var(--surface);
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(10, 16, 28, 0.96));
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      transition: border-color 0.2s, box-shadow 0.2s;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
     }
-    .server-card.offline { opacity: 0.6; }
-    .server-card.critical { border-color: #672a2a; }
 
-    .card-body { padding: 0.9rem 1rem 0.75rem; }
-
-    /* ── Card header ── */
-    .card-header {
-      display: flex; align-items: center; gap: 0.5rem;
-      margin-bottom: 0.8rem;
-    }
-    .status-dot {
-      width: 9px; height: 9px; border-radius: 50%;
-      flex-shrink: 0; transition: all 0.3s;
-    }
-    .status-dot.online  { background: var(--green); box-shadow: 0 0 7px var(--green); }
-    .status-dot.offline { background: var(--muted); }
-    .server-name {
-      font-weight: 600; font-size: 0.92rem;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;
-    }
-    .server-os {
-      font-size: 0.68rem; color: var(--muted);
-      background: #0d1117; border: 1px solid var(--border);
-      padding: 0.1rem 0.35rem; border-radius: 4px; white-space: nowrap;
-    }
-    .expand-btn {
-      background: none; border: 1px solid var(--border);
-      color: var(--muted); width: 24px; height: 24px;
-      border-radius: 5px; cursor: pointer; font-size: 0.65rem;
-      display: flex; align-items: center; justify-content: center;
-      transition: color 0.15s, border-color 0.15s, transform 0.25s;
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      color: #dcecff;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.22), rgba(34, 211, 238, 0.18));
+      border: 1px solid rgba(96, 165, 250, 0.2);
       flex-shrink: 0;
     }
-    .expand-btn:hover { color: var(--text); border-color: var(--blue); }
-    .expand-btn.open { transform: rotate(180deg); color: var(--blue); border-color: var(--blue); }
 
-    /* ── Gauges row ── */
-    .gauges {
-      display: flex; justify-content: space-around;
-      gap: 0.25rem; margin-bottom: 0.6rem;
+    .brand-copy h1 {
+      margin: 0;
+      font-size: 1rem;
+      letter-spacing: 0.02em;
     }
-    .gauge-col { flex: 1; max-width: 100px; min-width: 0; display: flex; flex-direction: column; align-items: center; }
-    .gauge-col svg { width: 100%; height: auto; }
-    .gauge-info {
-      width: 100%; text-align: center;
-      font-size: 0.68rem; color: var(--muted);
-      margin-top: 0.15rem; line-height: 1.5;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .gauge-info .gi-main { font-weight: 600; font-size: 0.72rem; }
 
-    /* ── Fan chips ── */
-    .fans-row {
-      display: flex; flex-wrap: wrap; gap: 0.3rem;
-      margin-bottom: 0.6rem; min-height: 0;
+    .brand-copy p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.76rem;
+      line-height: 1.4;
     }
-    .fans-row:empty { display: none; }
+
+    .side-section {
+      margin-bottom: 14px;
+      padding: 14px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.9), rgba(10, 16, 28, 0.92));
+      border: 1px solid var(--border);
+    }
+
+    .side-title {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 800;
+    }
+
+    .side-metrics {
+      display: grid;
+      gap: 8px;
+    }
+
+    .side-metric {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 9px 10px;
+      border-radius: 12px;
+      background: rgba(8, 13, 26, 0.72);
+      border: 1px solid rgba(148, 163, 184, 0.08);
+      color: var(--muted);
+    }
+
+    .side-metric strong {
+      color: var(--text-primary);
+      font-weight: 700;
+    }
+
+    .side-nav {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 4px;
+    }
+
+    .side-nav li a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 10px;
+      border-radius: 12px;
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 160ms ease;
+      cursor: pointer;
+    }
+
+    .side-nav li a:hover,
+    .side-nav li a.active {
+      color: var(--text-primary);
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--border-soft);
+    }
+
+    .side-nav li a svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .side-footer {
+      margin-top: auto;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-soft);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      display: grid;
+      gap: 6px;
+    }
+
+    .side-footer strong {
+      color: var(--text-secondary);
+    }
+
+    .workspace {
+      padding: 18px;
+      min-width: 0;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(10, 16, 28, 0.74);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+      position: sticky;
+      top: 10px;
+      z-index: 30;
+      box-shadow: var(--shadow);
+    }
+
+    .topbar-copy {
+      min-width: 0;
+    }
+
+    .topbar-copy h2 {
+      margin: 0;
+      font-size: 1.15rem;
+      letter-spacing: 0.01em;
+    }
+
+    .topbar-copy p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .topbar-spacer { flex: 1; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .pill strong { color: var(--text); }
+    .pill.ok { color: #bbf7d0; border-color: rgba(34, 197, 94, 0.22); background: rgba(7, 43, 22, 0.8); }
+    .pill.warn { color: #fde68a; border-color: rgba(245, 158, 11, 0.24); background: rgba(69, 38, 2, 0.74); }
+    .pill.bad { color: #fecaca; border-color: rgba(239, 68, 68, 0.24); background: rgba(69, 10, 10, 0.74); }
+
+    .live-pill {
+      gap: 8px;
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: livePulse 2.4s ease-in-out infinite;
+    }
+
+    @keyframes livePulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.55; transform: scale(0.85); }
+    }
+
+    .refresh-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      border: 1px solid var(--border-soft);
+      background: var(--bg-panel-solid-2);
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: all 160ms ease;
+      flex-shrink: 0;
+    }
+
+    .refresh-btn:hover {
+      color: var(--text-primary);
+      border-color: var(--border-strong);
+      background: var(--bg-panel-hover);
+    }
+
+    .refresh-btn.spin svg {
+      animation: spin 600ms linear;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .hero-panel,
+    .kpi-card,
+    .panel-card,
+    .controls,
+    .server-card,
+    .empty-state {
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(10, 16, 28, 0.96));
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-panel {
+      padding: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-panel::after {
+      content: '';
+      position: absolute;
+      right: -45px;
+      bottom: -45px;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(96, 165, 250, 0.18), transparent 72%);
+      pointer-events: none;
+    }
+
+    .hero-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(96, 165, 250, 0.12);
+      color: #d8e9ff;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .hero-panel h3 {
+      margin: 0;
+      font-size: 1.32rem;
+      line-height: 1.14;
+      max-width: 17ch;
+    }
+
+    .hero-panel p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      max-width: 58ch;
+      line-height: 1.58;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .hero-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(8, 13, 26, 0.86);
+      border: 1px solid rgba(148, 163, 184, 0.1);
+      color: var(--muted);
+      font-size: 0.74rem;
+    }
+
+    .kpi-card {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 138px;
+      transition: transform 160ms ease, border-color 160ms ease;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--border-strong);
+    }
+
+    .kpi-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .kpi-icon {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: rgba(148, 163, 184, 0.08);
+    }
+
+    .kpi-label {
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 800;
+    }
+
+    .kpi-value {
+      margin-top: 6px;
+      font-size: 1.8rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .kpi-foot {
+      margin-top: 8px;
+      color: var(--text-secondary);
+      font-size: 0.76rem;
+      line-height: 1.55;
+    }
+
+    .kpi-bar {
+      margin-top: 12px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.1);
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 184, 0.08);
+    }
+
+    .kpi-bar span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      transition: width 280ms ease;
+    }
+
+    .kpi-spark {
+      display: block;
+      width: 100%;
+      height: 36px !important;
+      margin-top: 10px;
+    }
+
+    .panel-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .panel-card {
+      padding: 14px;
+      min-width: 0;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .panel-head h4 {
+      margin: 0;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .panel-head strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 1.1rem;
+      color: var(--text);
+    }
+
+    .panel-head span {
+      color: var(--muted);
+      font-size: 0.74rem;
+    }
+
+    .panel-card canvas {
+      display: block;
+      width: 100%;
+      height: 240px !important;
+    }
+
+    .controls {
+      margin-top: 14px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .searchbox {
+      position: relative;
+      flex: 1 1 280px;
+      min-width: 220px;
+    }
+
+    .searchbox svg {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: var(--muted);
+    }
+
+    .searchbox input {
+      width: 100%;
+      height: 42px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--panel-3);
+      color: var(--text);
+      padding: 0 14px 0 42px;
+      outline: none;
+    }
+
+    .searchbox input:focus {
+      border-color: rgba(96, 165, 250, 0.35);
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.12);
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter-label {
+      color: var(--muted);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 800;
+    }
+
+    .filter-pill {
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--panel-3);
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .filter-pill.active,
+    .filter-pill:hover {
+      color: var(--text);
+      border-color: rgba(96, 165, 250, 0.24);
+      background: rgba(17, 39, 87, 0.42);
+    }
+
+    .controls-note {
+      margin-left: auto;
+      color: var(--text-muted);
+      font-size: 0.76rem;
+    }
+
+    .sort-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    #server-grid {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 14px;
+      align-items: start;
+    }
+
+    .hidden { display: none !important; }
+
+    .no-data {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 240px;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      text-align: center;
+    }
+
+    .no-data strong {
+      color: var(--text-secondary);
+      font-size: 0.92rem;
+    }
+
+    .no-data.hidden {
+      display: none !important;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+      animation: fadeIn 380ms ease forwards;
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      padding: 56px 24px;
+      text-align: center;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .empty-state strong {
+      display: block;
+      color: var(--text);
+      font-size: 1.05rem;
+      margin-bottom: 8px;
+    }
+
+    .server-card {
+      overflow: hidden;
+      transition: transform 0.18s ease, border-color 0.18s ease;
+    }
+
+    .server-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(96, 165, 250, 0.18);
+    }
+
+    .server-card.offline { opacity: 0.72; }
+    .server-card.warning { border-color: rgba(245, 158, 11, 0.32); }
+    .server-card.critical { border-color: rgba(239, 68, 68, 0.34); }
+
+    .card-body { padding: 16px; }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .card-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      color: #d9ebff;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.18), rgba(34, 211, 238, 0.16));
+      border: 1px solid rgba(96, 165, 250, 0.18);
+      flex-shrink: 0;
+    }
+
+    .card-title {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .card-title h3 {
+      margin: 0;
+      font-size: 1rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-subtitle {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      background: rgba(8, 13, 26, 0.82);
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .badge.online { color: #bbf7d0; border-color: rgba(34, 197, 94, 0.22); background: rgba(7, 43, 22, 0.78); }
+    .badge.offline { color: #cbd5e1; }
+    .badge.warning { color: #fde68a; border-color: rgba(245, 158, 11, 0.24); background: rgba(69, 38, 2, 0.74); }
+    .badge.critical { color: #fecaca; border-color: rgba(239, 68, 68, 0.24); background: rgba(69, 10, 10, 0.74); }
+    .badge.info { color: #d7e7ff; border-color: rgba(96, 165, 250, 0.2); background: rgba(17, 39, 87, 0.36); }
+
+    .expand-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--panel-3);
+      color: var(--muted);
+      cursor: pointer;
+      transition: transform 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .expand-btn.open,
+    .expand-btn:hover {
+      color: var(--text);
+      border-color: rgba(96, 165, 250, 0.24);
+      transform: rotate(180deg);
+    }
+
+    .metric-rows {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .metric-row {
+      display: grid;
+      grid-template-columns: 50px 60px 1fr auto;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: rgba(8, 13, 26, 0.5);
+      border: 1px solid rgba(148, 163, 184, 0.06);
+      min-width: 0;
+    }
+
+    .metric-row .metric-label {
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .metric-row .metric-value {
+      font-size: 1rem;
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .metric-row .metric-bar {
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.1);
+      overflow: hidden;
+    }
+
+    .metric-row .metric-bar span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      transition: width 280ms ease;
+    }
+
+    .metric-row .metric-extra {
+      color: var(--text-secondary);
+      font-size: 0.76rem;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .fan-chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
     .fan-chip {
-      display: inline-flex; align-items: center; gap: 0.2rem;
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 4px; padding: 0.15rem 0.45rem;
-      font-size: 0.67rem; white-space: nowrap;
-    }
-    .fan-chip .fc-label { color: var(--muted); }
-    .fan-chip .fc-val   { font-weight: 700; font-family: 'SF Mono','Fira Code',monospace; }
-
-    /* ── Sparklines ── */
-    .sparklines { display: flex; gap: 0.4rem; margin-bottom: 0.5rem; }
-    .spark-item { flex: 1; min-width: 0; }
-    .spark-label { font-size: 0.6rem; color: var(--muted); margin-bottom: 0.1rem; text-transform: uppercase; letter-spacing: 0.04em; }
-    .spark-item canvas { display: block; width: 100%; height: 28px; border-radius: 3px; }
-
-    /* ── Card meta (updated ago) ── */
-    .card-meta {
-      font-size: 0.68rem; color: var(--muted);
-      text-align: right; margin-top: 0.1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: rgba(8, 13, 26, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.08);
+      min-width: 0;
     }
 
-    /* ── Expand section ── */
+    .fan-chip-copy {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .fan-chip-copy span:first-child {
+      color: var(--muted);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 800;
+    }
+
+    .fan-chip-copy span:last-child {
+      color: var(--text);
+      font-size: 0.74rem;
+    }
+
+    .fan-chip strong {
+      font-size: 0.82rem;
+      white-space: nowrap;
+    }
+
+    .spark-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .spark-card {
+      padding: 10px;
+      border-radius: 12px;
+      background: rgba(8, 13, 26, 0.78);
+      border: 1px solid rgba(148, 163, 184, 0.08);
+      min-width: 0;
+    }
+
+    .spark-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--text-muted);
+      font-size: 0.66rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+
+    .spark-head strong {
+      color: var(--text-primary);
+      font-size: 0.72rem;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .spark-card canvas {
+      display: block;
+      width: 100%;
+      height: 32px;
+    }
+
+    .card-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 0.74rem;
+    }
+
+    .card-foot strong { color: var(--text); }
+
     .card-expand {
       max-height: 0;
       overflow: hidden;
-      transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1);
-      border-top: 0px solid var(--border);
+      transition: max-height 0.38s ease;
+      border-top: 0 solid rgba(148, 163, 184, 0.08);
     }
+
     .card-expand.open {
-      max-height: 2000px;
+      max-height: 2600px;
       border-top-width: 1px;
     }
-    .expand-inner { padding: 1rem; }
 
-    /* ── Inline charts ── */
-    .echart-section { margin-bottom: 1rem; }
-    .echart-title {
-      font-size: 0.68rem; font-weight: 700; color: var(--muted);
-      text-transform: uppercase; letter-spacing: 0.08em;
-      margin-bottom: 0.4rem;
-      display: flex; align-items: center; gap: 0.35rem;
+    .expand-inner {
+      padding: 16px;
+      background: rgba(7, 12, 24, 0.72);
     }
-    .echart-title::before {
-      content: ''; display: inline-block;
-      width: 3px; height: 11px; border-radius: 2px;
-    }
-    .echart-title.t-cpu::before   { background: var(--blue); }
-    .echart-title.t-ram::before   { background: var(--purple); }
-    .echart-title.t-gpu::before   { background: var(--green); }
-    .echart-title.t-temp::before  { background: var(--red); }
-    .echart-wrap {
-      background: #0d1117; border: 1px solid var(--border);
-      border-radius: 7px; padding: 0.6rem 0.6rem 0.2rem;
-    }
-    .echart-wrap canvas { height: 80px !important; }
 
-    /* ── Sensor tables in expand ── */
-    .sensor-section { margin-top: 0.9rem; }
-    .sensor-title {
-      font-size: 0.68rem; font-weight: 700; color: var(--muted);
-      text-transform: uppercase; letter-spacing: 0.08em;
-      margin-bottom: 0.4rem;
-      display: flex; align-items: center; gap: 0.35rem;
+    .expand-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
     }
-    .sensor-title::before {
-      content: ''; display: inline-block; width: 3px; height: 11px; border-radius: 2px;
+
+    .summary-tile {
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(8, 13, 26, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.08);
     }
-    .sensor-title.s-temps::before { background: var(--red); }
-    .sensor-title.s-fans::before  { background: var(--blue); }
+
+    .summary-tile .label {
+      color: var(--muted);
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .summary-tile .value {
+      margin-top: 6px;
+      font-size: 1rem;
+      font-weight: 800;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .detail-card {
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(10, 16, 28, 0.86);
+      border: 1px solid rgba(148, 163, 184, 0.08);
+      min-width: 0;
+    }
+
+    .detail-title {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .detail-card canvas {
+      display: block;
+      width: 100%;
+      height: 170px !important;
+    }
+
+    .detail-caption {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 0.74rem;
+      line-height: 1.45;
+    }
+
+    .sensor-panels {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .sensor-panel {
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(10, 16, 28, 0.86);
+      border: 1px solid rgba(148, 163, 184, 0.08);
+    }
+
     .sensor-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
-      gap: 0.3rem;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 8px;
     }
+
     .sensor-item {
-      background: #0d1117; border: 1px solid var(--border);
-      border-radius: 5px; padding: 0.35rem 0.55rem;
-      display: flex; align-items: center; justify-content: space-between; gap: 0.4rem;
-    }
-    .s-lbl {
-      font-size: 0.68rem; color: var(--muted);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;
-    }
-    .s-val {
-      font-family: 'SF Mono','Fira Code',monospace;
-      font-size: 0.75rem; font-weight: 700; white-space: nowrap; flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 11px;
+      border-radius: 12px;
+      background: rgba(8, 13, 26, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.08);
     }
 
-    /* ── GPU detail row in expand ── */
-    .gpu-detail {
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 7px; padding: 0.65rem 0.8rem;
-      margin-bottom: 0.75rem;
-      display: flex; flex-wrap: wrap; gap: 0.6rem 1.2rem;
+    .sensor-item .name {
+      min-width: 0;
+      color: var(--muted);
+      font-size: 0.76rem;
+      line-height: 1.4;
     }
-    .gpu-detail .gd-name {
-      width: 100%; font-weight: 600; font-size: 0.8rem;
-      color: var(--green); margin-bottom: 0.25rem;
-    }
-    .gpu-stat { display: flex; flex-direction: column; align-items: flex-start; gap: 0.1rem; }
-    .gpu-stat .gs-val { font-family: 'SF Mono','Fira Code',monospace; font-size: 0.82rem; font-weight: 700; }
-    .gpu-stat .gs-lbl { font-size: 0.63rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
 
-    /* ── Utilities ── */
-    .green  { color: var(--green) !important; }
+    .sensor-item .value {
+      white-space: nowrap;
+      font-size: 0.84rem;
+      font-weight: 800;
+    }
+
+    .green { color: var(--green) !important; }
     .yellow { color: var(--yellow) !important; }
-    .red    { color: var(--red) !important; }
+    .red { color: var(--red) !important; }
+    .blue { color: var(--blue) !important; }
 
-    @media (max-width: 520px) {
+    @media (max-width: 1340px) {
+      .hero-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .panel-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 1120px) {
+      .app-shell { grid-template-columns: 1fr; }
+      .sidebar { position: relative; height: auto; border-right: 0; border-bottom: 1px solid var(--border); }
+    }
+
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .panel-grid,
+      .detail-grid,
+      .sensor-panels,
+      .spark-grid,
+      .metric-rows { grid-template-columns: 1fr; }
+      .controls-note { width: 100%; margin-left: 0; }
+    }
+
+    @media (max-width: 600px) {
+      .workspace { padding: 10px; }
+      .sidebar { padding: 10px; }
+      .topbar { top: 6px; flex-wrap: wrap; }
       #server-grid { grid-template-columns: 1fr; }
+      .hero-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
   </style>
 </head>
 <body>
-
-<header>
-  <div class="logo">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <rect x="2" y="3" width="20" height="14" rx="2"/>
-      <path d="M8 21h8M12 17v4"/>
-      <circle cx="12" cy="10" r="2" fill="currentColor" stroke="none"/>
-      <path d="M7 10h2M15 10h2"/>
-    </svg>
-    Server Monitor
-  </div>
-  <span id="server-count">0 serveurs</span>
-  <div id="alert-banner">
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L1 21h22L12 2zm0 3.5L20.5 19h-17L12 5.5zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/></svg>
-    <span id="alert-text"></span>
-  </div>
-  <span id="clock">--:--:--</span>
-  <span id="ws-badge" class="connecting">Connexion…</span>
-</header>
-
-<main>
-  <div id="server-grid">
-    <div class="empty-state">
-      <strong>En attente des agents</strong>
-      Démarrez le poller ou un agent sur chaque serveur.<br>
-      Les données apparaîtront ici automatiquement.
-    </div>
-  </div>
-</main>
-
-<script>
-// ═══════════════════════════════════════════════════════════════════
-// Constants & state
-// ═══════════════════════════════════════════════════════════════════
-
-const R = 38;
-const CIRC = 2 * Math.PI * R;
-const SPARK_POINTS = 60;
-const HISTORY_WINDOW = 12 * 3600 * 1000;
-
-const state = {
-  servers: {},  // sid → { history:[], online:bool, lastData, expandCharts:{cpu,ram,gpu,temp} }
-  wsRetry: 0,
-};
-
-// ═══════════════════════════════════════════════════════════════════
-// Helpers
-// ═══════════════════════════════════════════════════════════════════
-
-function pctColor(v) {
-  return v < 60 ? '#3fb950' : v < 80 ? '#d29922' : '#f85149';
-}
-function tempColor(t) {
-  return t == null ? '#7d8590' : t < 50 ? '#3fb950' : t < 70 ? '#d29922' : '#f85149';
-}
-function gpuTempColor(t) {
-  return t == null ? '#7d8590' : t < 70 ? '#3fb950' : t < 85 ? '#d29922' : '#f85149';
-}
-function pctClass(v) { return v < 60 ? 'green' : v < 80 ? 'yellow' : 'red'; }
-function timeAgo(ts) {
-  const s = Math.round(Date.now() / 1000 - ts);
-  if (s < 5)    return 'maintenant';
-  if (s < 60)   return `${s}s`;
-  if (s < 3600) return `${Math.floor(s/60)}min`;
-  return `${Math.floor(s/3600)}h`;
-}
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-function fmtTs(ts) {
-  return new Date(ts * 1000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-}
-function getBestTemp(data) {
-  if (data.temps && Object.keys(data.temps).length) {
-    for (const [k, v] of Object.entries(data.temps))
-      if (/package/i.test(k)) return { val: v, label: k.split('/').slice(1).join('/') || k };
-    for (const [k, v] of Object.entries(data.temps))
-      if (/tdie|tctl/i.test(k)) return { val: v, label: k.split('/').slice(1).join('/') || k };
-    const [k, v] = Object.entries(data.temps)[0];
-    return { val: v, label: k.split('/').slice(1).join('/') || k };
-  }
-  if (data.cpu_temp != null) return { val: data.cpu_temp, label: 'CPU' };
-  return null;
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// SVG gauge
-// ═══════════════════════════════════════════════════════════════════
-
-function buildGaugeSVG(id, label, pct) {
-  const offset = CIRC * (1 - Math.min(100, Math.max(0, pct)) / 100);
-  const color  = pctColor(pct);
-  return `<svg viewBox="0 0 100 100">
-    <circle cx="50" cy="50" r="${R}" fill="none" stroke="#21262d" stroke-width="9"/>
-    <circle id="gc-${id}" cx="50" cy="50" r="${R}" fill="none"
-      stroke="${color}" stroke-width="9"
-      stroke-dasharray="${CIRC.toFixed(2)}"
-      stroke-dashoffset="${offset.toFixed(2)}"
-      stroke-linecap="round"
-      transform="rotate(-90 50 50)"
-      style="transition:stroke-dashoffset .6s ease,stroke .4s ease"/>
-    <text id="gtv-${id}" x="50" y="50" text-anchor="middle" dominant-baseline="central"
-      font-size="18" font-weight="700" fill="#e6edf3"
-      font-family="-apple-system,monospace">${Math.round(pct)}</text>
-    <text x="50" y="68" text-anchor="middle" font-size="9" fill="#7d8590">${escHtml(label)}</text>
-  </svg>`;
-}
-
-function updateGauge(id, pct) {
-  const circle = document.getElementById(`gc-${id}`);
-  const textV  = document.getElementById(`gtv-${id}`);
-  if (!circle) return;
-  const offset = CIRC * (1 - Math.min(100, Math.max(0, pct)) / 100);
-  circle.setAttribute('stroke-dashoffset', offset.toFixed(2));
-  circle.setAttribute('stroke', pctColor(pct));
-  if (textV) textV.textContent = Math.round(pct);
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Fan chips
-// ═══════════════════════════════════════════════════════════════════
-
-function buildFanChipsHTML(fans) {
-  if (!fans || !Object.keys(fans).length) return '';
-  return Object.entries(fans).map(([k, rpm]) => {
-    const label = k.split('/').slice(1).join('/') || k;
-    const col = rpm === 0 ? 'var(--muted)' : rpm < 600 ? 'var(--yellow)' : 'var(--blue)';
-    return `<span class="fan-chip">
-      <span class="fc-label">${escHtml(label)}</span>
-      <span class="fc-val" style="color:${col}">${rpm}<small style="font-weight:400;font-size:0.6rem;color:var(--muted)"> rpm</small></span>
-    </span>`;
-  }).join('');
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Card HTML builder
-// ═══════════════════════════════════════════════════════════════════
-
-function buildCardHTML(sid, data) {
-  const online  = state.servers[sid]?.online ?? true;
-  const cpuPct  = data.cpu_percent ?? 0;
-  const ramPct  = data.ram_percent ?? 0;
-  const gpus    = data.gpus;
-  const hasGpu  = gpus?.length > 0;
-  const g0      = hasGpu ? gpus[0] : null;
-  const bestTemp = getBestTemp(data);
-
-  // Gauge sub-info
-  const cpuInfo = [
-    `<span class="gi-main">${data.cpu_cores ?? '?'} cores</span>`,
-    bestTemp
-      ? `<span style="color:${tempColor(bestTemp.val)}">${bestTemp.val}&deg;C</span>`
-      : '',
-  ].filter(Boolean).join(' &middot; ');
-
-  const ramInfo = `<span class="gi-main">${(data.ram_used_gb??0).toFixed(1)}<span style="font-weight:400;color:var(--muted)">/${(data.ram_total_gb??0).toFixed(1)} GB</span></span>`;
-
-  let gpuInfo = '';
-  if (g0) {
-    const parts = [`<span class="gi-main">${(g0.mem_used_gb??0).toFixed(1)}/${(g0.mem_total_gb??0).toFixed(1)} GB</span>`];
-    if (g0.temp != null) parts.push(`<span style="color:${gpuTempColor(g0.temp)}">${g0.temp}&deg;C</span>`);
-    if (g0.fan_pct != null) parts.push(`<span style="color:${pctColor(g0.fan_pct)}">${g0.fan_pct}%</span>`);
-    gpuInfo = parts.join(' &middot; ');
-  }
-
-  let gaugesHTML = `
-    <div class="gauge-col">
-      ${buildGaugeSVG(`${sid}-cpu`, 'CPU', cpuPct)}
-      <div class="gauge-info">${cpuInfo}</div>
-    </div>
-    <div class="gauge-col">
-      ${buildGaugeSVG(`${sid}-ram`, 'RAM', ramPct)}
-      <div class="gauge-info">${ramInfo}</div>
-    </div>`;
-
-  if (g0) {
-    gaugesHTML += `
-    <div class="gauge-col">
-      ${buildGaugeSVG(`${sid}-gpu`, 'GPU', g0.util ?? 0)}
-      <div class="gauge-info">${gpuInfo}</div>
-    </div>`;
-  }
-
-  return `
-    <div class="card-header">
-      <span class="status-dot ${online ? 'online' : 'offline'}"></span>
-      <span class="server-name">${escHtml(data.hostname || sid)}</span>
-      <span class="server-os">${escHtml(data.os || '?')}</span>
-      <button class="expand-btn" onclick="toggleExpand('${escHtml(sid)}')" title="Détails">&#9660;</button>
-    </div>
-    <div class="gauges">${gaugesHTML}</div>
-    <div class="fans-row" id="fans-${sid}">${buildFanChipsHTML(data.fans)}</div>
-    <div class="sparklines">
-      <div class="spark-item">
-        <div class="spark-label">CPU</div>
-        <canvas id="sp-cpu-${sid}"></canvas>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22">
+            <rect x="3" y="4" width="18" height="12" rx="3"></rect>
+            <path d="M8 20h8"></path>
+            <path d="M12 16v4"></path>
+            <circle cx="12" cy="10" r="1.8" fill="currentColor" stroke="none"></circle>
+          </svg>
+        </div>
+        <div class="brand-copy">
+          <h1>Server Monitor</h1>
+          <p>Infra board inspiré des plateformes d’observabilité.</p>
+        </div>
       </div>
-      <div class="spark-item">
-        <div class="spark-label">RAM</div>
-        <canvas id="sp-ram-${sid}"></canvas>
+
+      <section class="side-section">
+        <h3 class="side-title">Fleet Summary</h3>
+        <div class="side-metrics">
+          <div class="side-metric"><span>Hosts online</span><strong id="side-online">0 / 0</strong></div>
+          <div class="side-metric"><span>Alerts</span><strong id="side-alerts">0</strong></div>
+          <div class="side-metric"><span>Avg CPU</span><strong id="side-cpu">0%</strong></div>
+          <div class="side-metric"><span>Hotspot</span><strong id="side-hottest">—</strong></div>
+        </div>
+      </section>
+
+      <section class="side-section">
+        <h3 class="side-title">Navigation</h3>
+        <ul class="side-nav">
+          <li><a class="active" href="#hero-grid"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg> Overview</a></li>
+          <li><a href="#server-grid"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg> Hosts</a></li>
+          <li><a href="#fleet-panels"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20v-6m0 0V4m0 6h6m-6 0H6"/></svg> Metrics</a></li>
+          <li><a href="#server-grid" data-nav-filter="alert"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Alerts</a></li>
+          <li><a href="#controls"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 5 15.4a1.65 1.65 0 0 0-1.51 1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings</a></li>
+        </ul>
+      </section>
+
+      <div class="side-footer">
+        <div>API: <strong id="side-api">Polling</strong></div>
+        <div>Last update: <strong id="side-last">—</strong></div>
       </div>
-      ${hasGpu ? `<div class="spark-item">
-        <div class="spark-label">GPU</div>
-        <canvas id="sp-gpu-${sid}"></canvas>
-      </div>` : ''}
-    </div>
-    <div class="card-meta">Mis à jour <span id="upd-${sid}">${timeAgo(data.timestamp)}</span></div>`;
-}
+    </aside>
 
-// ═══════════════════════════════════════════════════════════════════
-// Sparklines
-// ═══════════════════════════════════════════════════════════════════
+    <main class="workspace">
+      <header class="topbar">
+        <div class="topbar-copy">
+          <h2>Observability Dashboard</h2>
+          <p>Real-time infrastructure health across all monitored hosts</p>
+        </div>
+        <div class="topbar-spacer"></div>
+        <span class="pill" id="server-count"><strong>0/0</strong> hosts</span>
+        <span class="pill" id="incident-pill">No alerts</span>
+        <span class="pill live-pill" id="ws-badge"><span class="live-dot"></span> Live</span>
+        <button class="refresh-btn" id="refresh-btn" type="button" title="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
+      </header>
 
-function drawSparkline(canvas, values, color) {
-  if (!canvas || values.length < 2) return;
-  const dpr = window.devicePixelRatio || 1;
-  const w = canvas.offsetWidth * dpr;
-  const h = canvas.offsetHeight * dpr;
-  canvas.width = w; canvas.height = h;
-  const ctx = canvas.getContext('2d');
-  const xStep = w / (values.length - 1);
-  const toY = v => h - (Math.min(100, Math.max(0, v)) / 100) * (h * 0.88) - h * 0.06;
+      <section class="hero-grid" id="hero-grid">
+        <article class="kpi-card">
+          <div class="kpi-top">
+            <div class="kpi-icon" style="color:var(--blue)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg></div>
+            <div class="kpi-label">Hosts online</div>
+          </div>
+          <div class="kpi-value" id="kpi-online">0 / 0</div>
+          <div class="kpi-foot" id="kpi-online-foot">No servers detected.</div>
+          <div class="kpi-bar"><span id="kpi-online-bar" style="width:0%;background:var(--blue)"></span></div>
+        </article>
 
-  const grad = ctx.createLinearGradient(0, 0, 0, h);
-  grad.addColorStop(0, color + '50'); grad.addColorStop(1, color + '05');
-  ctx.beginPath();
-  ctx.moveTo(0, toY(values[0]));
-  for (let i = 1; i < values.length; i++) ctx.lineTo(i * xStep, toY(values[i]));
-  ctx.lineTo((values.length - 1) * xStep, h);
-  ctx.lineTo(0, h); ctx.closePath();
-  ctx.fillStyle = grad; ctx.fill();
+        <article class="kpi-card">
+          <div class="kpi-top">
+            <div class="kpi-icon" style="color:var(--metric-cpu)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M20 15h2"/></svg></div>
+            <div class="kpi-label">Avg CPU</div>
+          </div>
+          <div class="kpi-value" id="kpi-cpu" style="color:var(--metric-cpu)">0%</div>
+          <div class="kpi-foot" id="kpi-cpu-foot">Avg across 0 hosts</div>
+          <div class="kpi-bar"><span id="kpi-cpu-bar" style="width:0%;background:var(--metric-cpu)"></span></div>
+          <canvas id="kpi-cpu-spark" class="kpi-spark"></canvas>
+        </article>
 
-  ctx.beginPath();
-  ctx.moveTo(0, toY(values[0]));
-  for (let i = 1; i < values.length; i++) ctx.lineTo(i * xStep, toY(values[i]));
-  ctx.strokeStyle = color; ctx.lineWidth = 1.5 * dpr;
-  ctx.lineJoin = 'round'; ctx.stroke();
-}
+        <article class="kpi-card">
+          <div class="kpi-top">
+            <div class="kpi-icon" style="color:var(--metric-ram)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
+            <div class="kpi-label">Avg RAM</div>
+          </div>
+          <div class="kpi-value" id="kpi-ram" style="color:var(--metric-ram)">0%</div>
+          <div class="kpi-foot" id="kpi-ram-foot">Memory pressure across fleet</div>
+          <div class="kpi-bar"><span id="kpi-ram-bar" style="width:0%;background:var(--metric-ram)"></span></div>
+          <canvas id="kpi-ram-spark" class="kpi-spark"></canvas>
+        </article>
 
-function refreshSparklines(sid) {
-  const hist = state.servers[sid]?.history || [];
-  const recent = hist.slice(-SPARK_POINTS);
-  if (recent.length < 2) return;
-  drawSparkline(document.getElementById(`sp-cpu-${sid}`), recent.map(d => d.cpu_percent), '#58a6ff');
-  drawSparkline(document.getElementById(`sp-ram-${sid}`), recent.map(d => d.ram_percent), '#bc8cff');
-  if (recent.some(d => d.gpus?.length))
-    drawSparkline(document.getElementById(`sp-gpu-${sid}`), recent.map(d => d.gpus?.[0]?.util ?? 0), '#3fb950');
-}
+        <article class="kpi-card">
+          <div class="kpi-top">
+            <div class="kpi-icon" style="color:var(--metric-temp)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg></div>
+            <div class="kpi-label">Highest temp</div>
+          </div>
+          <div class="kpi-value" id="kpi-temp" style="color:var(--metric-temp)">—</div>
+          <div class="kpi-foot" id="kpi-temp-foot">Hottest sensor across fleet</div>
+          <canvas id="kpi-temp-spark" class="kpi-spark"></canvas>
+        </article>
 
-// ═══════════════════════════════════════════════════════════════════
-// Expand section: inline Chart.js charts + sensor tables
-// ═══════════════════════════════════════════════════════════════════
+        <article class="kpi-card">
+          <div class="kpi-top">
+            <div class="kpi-icon" style="color:var(--metric-gpu)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="4" y="4" width="16" height="10" rx="2"/><path d="M9 14v4"/><path d="M15 14v4"/><path d="M12 18v2"/></svg></div>
+            <div class="kpi-label">GPU / VRAM</div>
+          </div>
+          <div class="kpi-value" id="kpi-gpu" style="color:var(--metric-gpu)">—</div>
+          <div class="kpi-foot" id="kpi-gpu-foot">No GPU data available</div>
+          <canvas id="kpi-gpu-spark" class="kpi-spark"></canvas>
+        </article>
 
-function CHART_OPTS(unit, maxY) {
-  return {
-    responsive: true, maintainAspectRatio: false,
-    animation: { duration: 400 },
-    interaction: { mode: 'index', intersect: false },
-    scales: {
-      x: {
-        ticks: { color: '#7d8590', font: { size: 9 }, maxTicksLimit: 7, maxRotation: 0 },
-        grid: { color: '#21262d' },
-      },
-      y: {
-        min: 0, ...(maxY ? { max: maxY } : {}),
-        ticks: {
-          color: '#7d8590', font: { size: 9 }, stepSize: maxY ? undefined : 25,
-          callback: v => v + unit,
-        },
-        grid: { color: '#21262d' },
-      },
-    },
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: '#1c2128', borderColor: '#30363d', borderWidth: 1,
-        titleColor: '#e6edf3', bodyColor: '#7d8590',
-        callbacks: { label: c => ` ${c.dataset.label}: ${c.parsed.y.toFixed(1)}${unit}` },
-      },
-    },
-  };
-}
+        <article class="kpi-card">
+          <div class="kpi-top">
+            <div class="kpi-icon" style="color:var(--yellow)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <div class="kpi-label">Alerts</div>
+          </div>
+          <div class="kpi-value" id="kpi-alerts" style="color:var(--yellow)">0</div>
+          <div class="kpi-foot" id="kpi-alerts-foot">All systems healthy</div>
+          <div class="kpi-bar"><span id="kpi-alerts-bar" style="width:0%;background:var(--yellow)"></span></div>
+        </article>
+      </section>
 
-function makeChart(canvasId, datasets, labels, unit, maxY) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) return null;
-  const ctx = canvas.getContext('2d');
-  return new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: datasets.map(ds => ({
-        label: ds.label,
-        data: ds.values,
-        borderColor: ds.color,
-        backgroundColor: ds.color + '18',
-        borderWidth: 1.5,
-        pointRadius: 0,
-        fill: true,
-        tension: 0.3,
-      })),
-    },
-    options: CHART_OPTS(unit, maxY),
-  });
-}
+      <section class="panel-grid" id="fleet-panels">
+        <article class="panel-card">
+          <div class="panel-head">
+            <div>
+              <h4>Fleet CPU history</h4>
+              <strong id="fleet-cpu-current">0%</strong>
+            </div>
+            <span>Avg across hosts</span>
+          </div>
+          <div class="no-data" id="no-data-cpu">
+            <strong>No data available yet</strong>
+            <span>Waiting for next polling cycle</span>
+          </div>
+          <canvas id="fleet-cpu-chart"></canvas>
+        </article>
 
-function buildExpandHTML(sid, data, hasGpu, hasTemp) {
-  const gpuName = data?.gpus?.[0]?.name || 'GPU';
-  return `
-    ${hasGpu ? `<div class="gpu-detail" id="gpu-detail-${sid}">
-      <div class="gd-name">${escHtml(gpuName)}</div>
-    </div>` : ''}
-    <div class="echart-section">
-      <div class="echart-title t-cpu">CPU %</div>
-      <div class="echart-wrap"><canvas id="ec-cpu-${sid}"></canvas></div>
-    </div>
-    <div class="echart-section">
-      <div class="echart-title t-ram">RAM %</div>
-      <div class="echart-wrap"><canvas id="ec-ram-${sid}"></canvas></div>
-    </div>
-    ${hasGpu ? `<div class="echart-section">
-      <div class="echart-title t-gpu">GPU %</div>
-      <div class="echart-wrap"><canvas id="ec-gpu-${sid}"></canvas></div>
-    </div>` : ''}
-    ${hasTemp ? `<div class="echart-section">
-      <div class="echart-title t-temp">Température CPU</div>
-      <div class="echart-wrap"><canvas id="ec-temp-${sid}"></canvas></div>
-    </div>` : ''}
-    <div id="sensors-${sid}"></div>`;
-}
+        <article class="panel-card">
+          <div class="panel-head">
+            <div>
+              <h4>Fleet RAM history</h4>
+              <strong id="fleet-ram-current">0%</strong>
+            </div>
+            <span>Memory pressure</span>
+          </div>
+          <div class="no-data" id="no-data-ram">
+            <strong>No data available yet</strong>
+            <span>Waiting for next polling cycle</span>
+          </div>
+          <canvas id="fleet-ram-chart"></canvas>
+        </article>
 
-function renderSensors(data, container) {
-  const hasTemps = data.temps && Object.keys(data.temps).length;
-  const hasFans  = data.fans  && Object.keys(data.fans).length;
-  if (!hasTemps && !hasFans) { container.innerHTML = ''; return; }
-  let html = '';
-  if (hasTemps) {
-    const items = Object.entries(data.temps).map(([k, v]) => {
-      const label = k.split('/').slice(1).join('/') || k;
-      return `<div class="sensor-item">
-        <span class="s-lbl" title="${escHtml(k)}">${escHtml(label)}</span>
-        <span class="s-val" style="color:${tempColor(v)}">${v}&deg;C</span>
-      </div>`;
-    }).join('');
-    html += `<div class="sensor-section"><div class="sensor-title s-temps">Températures</div>
-      <div class="sensor-grid">${items}</div></div>`;
-  }
-  if (hasFans) {
-    const items = Object.entries(data.fans).map(([k, rpm]) => {
-      const label = k.split('/').slice(1).join('/') || k;
-      const col = rpm === 0 ? 'var(--muted)' : rpm < 600 ? 'var(--yellow)' : 'var(--blue)';
-      return `<div class="sensor-item">
-        <span class="s-lbl" title="${escHtml(k)}">${escHtml(label)}</span>
-        <span class="s-val" style="color:${col}">${rpm} rpm</span>
-      </div>`;
-    }).join('');
-    html += `<div class="sensor-section"><div class="sensor-title s-fans">Ventilateurs</div>
-      <div class="sensor-grid">${items}</div></div>`;
-  }
-  container.innerHTML = html;
-}
+        <article class="panel-card">
+          <div class="panel-head">
+            <div>
+              <h4>Thermals / temperature history</h4>
+              <strong id="fleet-temp-current">—</strong>
+            </div>
+            <span>CPU temperature</span>
+          </div>
+          <div class="no-data" id="no-data-temp">
+            <strong>No data available yet</strong>
+            <span>Waiting for next polling cycle</span>
+          </div>
+          <canvas id="fleet-temp-chart"></canvas>
+        </article>
 
-function updateGpuDetail(sid, data) {
-  const el = document.getElementById(`gpu-detail-${sid}`);
-  if (!el || !data?.gpus?.length) return;
-  const g = data.gpus[0];
-  const stats = [
-    { val: `${g.util ?? 0}%`,                   cls: pctClass(g.util ?? 0),           lbl: 'Utilisation' },
-    { val: `${(g.mem_used_gb??0).toFixed(1)} / ${(g.mem_total_gb??0).toFixed(1)} GB`, cls: pctClass(g.mem_percent ?? 0), lbl: 'VRAM' },
-  ];
-  if (g.temp != null) {
-    const tc = g.temp < 70 ? 'green' : g.temp < 85 ? 'yellow' : 'red';
-    stats.push({ val: `${g.temp}°C`, cls: tc, lbl: 'Temp' });
-  }
-  if (g.fan_pct != null) {
-    stats.push({ val: `${g.fan_pct}%`, cls: pctClass(g.fan_pct), lbl: 'Fan' });
-  }
-  el.innerHTML = `<div class="gd-name">${escHtml(g.name || 'GPU')}</div>` +
-    stats.map(s => `<div class="gpu-stat"><span class="gs-val ${s.cls}">${escHtml(s.val)}</span><span class="gs-lbl">${escHtml(s.lbl)}</span></div>`).join('');
-}
+      </section>
 
-async function toggleExpand(sid) {
-  const card = document.getElementById(`card-${sid}`);
-  if (!card) return;
-  const expandDiv = card.querySelector('.card-expand');
-  const btn       = card.querySelector('.expand-btn');
-  const s         = state.servers[sid];
+      <section class="controls" id="controls">
+        <div class="searchbox">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="m20 20-3.5-3.5"></path>
+          </svg>
+          <input id="search-input" type="search" placeholder="Search host, hostname, OS or GPU…">
+        </div>
 
-  if (expandDiv.classList.contains('open')) {
-    // Collapse
-    expandDiv.classList.remove('open');
-    btn.classList.remove('open');
-    // Destroy Chart instances to free memory
-    if (s?.expandCharts) {
-      Object.values(s.expandCharts).forEach(c => c?.destroy?.());
-      s.expandCharts = null;
+        <div class="filter-group">
+          <span class="filter-label">Filter</span>
+          <button class="filter-pill active" data-filter="all">All</button>
+          <button class="filter-pill" data-filter="online">Online</button>
+          <button class="filter-pill" data-filter="offline">Offline</button>
+          <button class="filter-pill" data-filter="alert">Alerts</button>
+          <button class="filter-pill" data-filter="gpu">GPU hosts</button>
+        </div>
+
+        <div class="sort-group">
+          <span class="filter-label">Sort</span>
+          <button class="filter-pill active" data-sort="severity">Criticality</button>
+          <button class="filter-pill" data-sort="cpu">CPU</button>
+          <button class="filter-pill" data-sort="ram">RAM</button>
+          <button class="filter-pill" data-sort="temp">Temp</button>
+          <button class="filter-pill" data-sort="name">Name</button>
+        </div>
+      </section>
+
+      <section id="server-grid">
+        <div class="empty-state">
+          <strong>Waiting for agents</strong>
+          Start the poller or agent on each server.<br>
+          Panels and cards will appear here automatically.
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const HISTORY_WINDOW = 12 * 3600 * 1000;
+    const SPARK_POINTS = 60;
+    const FLEET_POINTS = 40;
+
+    const state = {
+      servers: {},
+      wsRetry: 0,
+      filters: { query: '', mode: 'all', sort: 'severity' },
+      fleetCharts: {},
+      kpiHistory: { cpu: [], ram: [], temp: [], gpu: [] },
+    };
+
+    function escHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
     }
-    expandDiv.innerHTML = '';
-    return;
-  }
 
-  // Expand
-  expandDiv.classList.add('open');
-  btn.classList.add('open');
+    function avg(values) {
+      const nums = values.filter(v => Number.isFinite(v));
+      if (!nums.length) return 0;
+      return nums.reduce((sum, v) => sum + v, 0) / nums.length;
+    }
 
-  let history = s?.history || [];
-  try {
-    const resp = await fetch(`/api/history/${encodeURIComponent(sid)}`);
-    if (resp.ok) history = await resp.json();
-  } catch (e) { /* use local */ }
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
 
-  const latest  = history[history.length - 1] || s?.lastData;
-  const hasGpu  = history.some(d => d.gpus?.length);
-  const hasTemp = history.some(d => d.cpu_temp != null);
+    function fmtTs(ts) {
+      return new Date(ts * 1000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    }
 
-  expandDiv.innerHTML = `<div class="expand-inner">${buildExpandHTML(sid, latest, hasGpu, hasTemp)}</div>`;
+    function timeAgo(ts) {
+      const delta = Math.round(Date.now() / 1000 - ts);
+      if (delta < 5) return 'just now';
+      if (delta < 60) return `${delta}s ago`;
+      if (delta < 3600) return `${Math.floor(delta / 60)} min ago`;
+      return `${Math.floor(delta / 3600)}h ago`;
+    }
 
-  const labels    = history.map(d => fmtTs(d.timestamp));
-  const cpuVals   = history.map(d => d.cpu_percent ?? 0);
-  const ramVals   = history.map(d => d.ram_percent ?? 0);
+    function pctColor(value) {
+      if (value == null) return '#8da2c6';
+      return value < 60 ? '#22c55e' : value < 80 ? '#f59e0b' : '#ef4444';
+    }
 
-  const charts = {};
-  charts.cpu = makeChart(`ec-cpu-${sid}`, [{ label: 'CPU %', values: cpuVals, color: '#58a6ff' }], labels, '%', 100);
-  charts.ram = makeChart(`ec-ram-${sid}`, [{ label: 'RAM %', values: ramVals, color: '#bc8cff' }], labels, '%', 100);
+    function pctClass(value) {
+      if (value == null) return 'blue';
+      return value < 60 ? 'green' : value < 80 ? 'yellow' : 'red';
+    }
 
-  if (hasGpu) {
-    const gpuVals  = history.map(d => d.gpus?.[0]?.util ?? 0);
-    const gpuMVals = history.map(d => d.gpus?.[0]?.mem_percent ?? 0);
-    const gpuOpts  = CHART_OPTS('%', 100);
-    gpuOpts.plugins.legend.display = true;
-    gpuOpts.plugins.legend.labels = { color: '#7d8590', font: { size: 9 }, boxWidth: 8 };
-    const cvs = document.getElementById(`ec-gpu-${sid}`);
-    if (cvs) {
-      charts.gpu = new Chart(cvs.getContext('2d'), {
+    function tempColor(value) {
+      if (value == null) return '#8da2c6';
+      return value < 60 ? '#22c55e' : value < 75 ? '#f59e0b' : '#ef4444';
+    }
+
+    function tempClass(value) {
+      if (value == null) return 'blue';
+      return value < 60 ? 'green' : value < 75 ? 'yellow' : 'red';
+    }
+
+    function prettifyLabel(key) {
+      return String(key).split('/').slice(1).join('/') || String(key);
+    }
+
+    function getBestTemp(data) {
+      if (data?.temps && Object.keys(data.temps).length) {
+        for (const [key, value] of Object.entries(data.temps)) {
+          if (/package/i.test(key)) return { label: prettifyLabel(key), value };
+        }
+        for (const [key, value] of Object.entries(data.temps)) {
+          if (/tdie|tctl|tccd/i.test(key)) return { label: prettifyLabel(key), value };
+        }
+        const [key, value] = Object.entries(data.temps)[0];
+        return { label: prettifyLabel(key), value };
+      }
+      if (data?.cpu_temp != null) return { label: 'CPU', value: data.cpu_temp };
+      return null;
+    }
+
+    function getAverageFanPct(data) {
+      const values = Object.values(data?.fan_percentages || {}).filter(v => Number.isFinite(v));
+      return values.length ? avg(values) : null;
+    }
+
+    function getPrimaryFanPct(data) {
+      return data?.gpus?.[0]?.fan_pct ?? getAverageFanPct(data);
+    }
+
+    function getServerSeverity(data, online = true) {
+      if (!online) return 'offline';
+      const temp = getBestTemp(data)?.value;
+      if ((data?.cpu_percent ?? 0) > 90 || (data?.ram_percent ?? 0) > 92 || (data?.gpus?.[0]?.util ?? 0) > 95 || temp > 75) return 'critical';
+      if ((data?.cpu_percent ?? 0) > 75 || (data?.ram_percent ?? 0) > 80 || (data?.gpus?.[0]?.util ?? 0) > 80 || temp > 60) return 'warning';
+      return 'healthy';
+    }
+
+    function matchesFilters(sid, server) {
+      if (!server?.lastData) return false;
+      const haystack = [sid, server.lastData.hostname, server.lastData.os, server.lastData.gpus?.[0]?.name].filter(Boolean).join(' ').toLowerCase();
+      const query = state.filters.query.trim().toLowerCase();
+      const severity = getServerSeverity(server.lastData, server.online);
+      if (state.filters.mode === 'online' && !server.online) return false;
+      if (state.filters.mode === 'offline' && server.online) return false;
+      if (state.filters.mode === 'alert' && !['warning', 'critical'].includes(severity)) return false;
+      if (state.filters.mode === 'gpu' && !server.lastData.gpus?.length) return false;
+      if (query && !haystack.includes(query)) return false;
+      return true;
+    }
+
+    function buildMetricRow(label, value, pct, extra, color) {
+      return `
+        <div class="metric-row">
+          <span class="metric-label">${escHtml(label)}</span>
+          <span class="metric-value" style="color:${color}">${escHtml(value)}</span>
+          <div class="metric-bar"><span style="width:${clamp(pct ?? 0, 0, 100)}%;background:${color}"></span></div>
+          <span class="metric-extra">${extra}</span>
+        </div>`;
+    }
+
+    function buildStatusBadge(data, online) {
+      const severity = getServerSeverity(data, online);
+      if (!online) return '<span class="badge offline">Offline</span>';
+      if (severity === 'critical') return '<span class="badge critical">Critical</span>';
+      if (severity === 'warning') return '<span class="badge warning">Warning</span>';
+      return '<span class="badge online">Online</span>';
+    }
+
+    function buildFanChipRow(data) {
+      const fans = data?.fans || {};
+      if (!Object.keys(fans).length) return '';
+      return Object.entries(fans).map(([key, rpm]) => {
+        const pct = data.fan_percentages?.[key];
+        const color = rpm === 0 ? '#8da2c6' : rpm < 600 ? '#f59e0b' : '#60a5fa';
+        return `
+          <div class="fan-chip">
+            <div class="fan-chip-copy">
+              <span>${escHtml(prettifyLabel(key))}</span>
+              <span>${pct != null ? `${pct}% · PWM` : 'RPM only'}</span>
+            </div>
+            <strong style="color:${color}">${rpm} rpm</strong>
+          </div>`;
+      }).join('');
+    }
+
+    function sparkDefinitions(data) {
+      const defs = [
+        { key: 'cpu', label: 'CPU', value: `${Math.round(data?.cpu_percent ?? 0)}%`, color: '#60a5fa' },
+        { key: 'ram', label: 'RAM', value: `${Math.round(data?.ram_percent ?? 0)}%`, color: '#a78bfa' },
+      ];
+      if (data?.gpus?.length) defs.push({ key: 'gpu', label: 'GPU', value: `${Math.round(data.gpus[0].util ?? 0)}%`, color: '#22c55e' });
+      return defs;
+    }
+
+    function buildCardHTML(sid, data, expanded = false) {
+      const online = state.servers[sid]?.online ?? true;
+      const gpu = data?.gpus?.[0] || null;
+      const temp = getBestTemp(data);
+      const sparkDefs = sparkDefinitions(data);
+      const tempStatus = temp ? (temp.value < 60 ? 'normal' : temp.value < 75 ? 'warning' : 'critical') : 'n/a';
+      const avgFan = getAverageFanPct(data);
+
+      const rows = [
+        buildMetricRow('CPU', `${Math.round(data.cpu_percent ?? 0)}%`, data.cpu_percent ?? 0, `${data.cpu_cores ?? '?'} cores`, pctColor(data.cpu_percent ?? 0)),
+        buildMetricRow('RAM', `${Math.round(data.ram_percent ?? 0)}%`, data.ram_percent ?? 0, `${(data.ram_used_gb ?? 0).toFixed(1)} / ${(data.ram_total_gb ?? 0).toFixed(1)} GB`, pctColor(data.ram_percent ?? 0)),
+      ];
+      if (gpu) {
+        rows.push(buildMetricRow('GPU', `${Math.round(gpu.util ?? 0)}%`, gpu.util ?? 0, escHtml(gpu.name || 'GPU'), pctColor(gpu.util ?? 0)));
+        rows.push(buildMetricRow('VRAM', `${Math.round(gpu.mem_percent ?? 0)}%`, gpu.mem_percent ?? 0, `${(gpu.mem_used_gb ?? 0).toFixed(1)} / ${(gpu.mem_total_gb ?? 0).toFixed(1)} GB`, pctColor(gpu.mem_percent ?? 0)));
+      }
+      rows.push(buildMetricRow('Temp', temp ? `${temp.value.toFixed(1)}°C` : '—', temp ? clamp(temp.value, 0, 100) : 0, tempStatus, tempColor(temp?.value)));
+      rows.push(buildMetricRow('Fan', gpu?.fan_pct != null ? `${gpu.fan_pct}%` : avgFan != null ? `${avgFan.toFixed(0)}%` : '—', gpu?.fan_pct ?? avgFan ?? 0, gpu?.fan_pct != null ? 'GPU fan' : avgFan != null ? 'SYS avg' : 'unavailable', pctColor(gpu?.fan_pct ?? avgFan ?? 0)));
+
+      return `
+        <div class="card-header">
+          <div class="card-avatar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20">
+              <rect x="4" y="5" width="16" height="10" rx="2"></rect>
+              <path d="M8 19h8"></path>
+              <path d="M12 15v4"></path>
+            </svg>
+          </div>
+          <div class="card-title">
+            <h3>${escHtml(data.hostname || sid)}</h3>
+            <div class="card-subtitle">
+              <span>ID: ${escHtml(sid)}</span>
+              <span>${escHtml(data.os || 'Unknown')}</span>
+              <span>Last seen ${escHtml(timeAgo(data.timestamp))}</span>
+            </div>
+            <div class="badge-row">
+              ${buildStatusBadge(data, online)}
+              <span class="badge info">${escHtml(data.cpu_cores ?? '?')} cores</span>
+              ${gpu ? `<span class="badge info">${escHtml(gpu.name || 'GPU')}</span>` : ''}
+            </div>
+          </div>
+          <button class="expand-btn ${expanded ? 'open' : ''}" onclick="toggleExpand('${escHtml(sid)}')">⌄</button>
+        </div>
+
+        <div class="metric-rows">${rows.join('')}</div>
+
+        <div class="fan-chip-row" id="fans-${sid}">${buildFanChipRow(data)}</div>
+
+        <div class="spark-grid">
+          ${sparkDefs.map(def => `
+            <div class="spark-card">
+              <div class="spark-head"><span>${escHtml(def.label)}</span><strong>${escHtml(def.value)}</strong></div>
+              <canvas id="sp-${def.key}-${sid}"></canvas>
+            </div>`).join('')}
+        </div>
+
+        <div class="card-foot">
+          <span>${escHtml(data.os || 'Unknown')}</span>
+          <strong id="upd-${sid}">${escHtml(timeAgo(data.timestamp))}</strong>
+        </div>`;
+    }
+
+    function drawSparkline(canvas, values, color) {
+      if (!canvas || values.length < 2) return;
+      const dpr = window.devicePixelRatio || 1;
+      const width = Math.max(100, canvas.clientWidth || canvas.offsetWidth || 100) * dpr;
+      const height = Math.max(34, canvas.clientHeight || canvas.offsetHeight || 34) * dpr;
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, width, height);
+
+      const xStep = width / (values.length - 1);
+      const toY = value => height - (clamp(value, 0, 100) / 100) * (height * 0.84) - height * 0.08;
+      const gradient = ctx.createLinearGradient(0, 0, 0, height);
+      gradient.addColorStop(0, `${color}55`);
+      gradient.addColorStop(1, `${color}05`);
+
+      ctx.beginPath();
+      ctx.moveTo(0, toY(values[0]));
+      for (let i = 1; i < values.length; i++) ctx.lineTo(i * xStep, toY(values[i]));
+      ctx.lineTo((values.length - 1) * xStep, height);
+      ctx.lineTo(0, height);
+      ctx.closePath();
+      ctx.fillStyle = gradient;
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(0, toY(values[0]));
+      for (let i = 1; i < values.length; i++) ctx.lineTo(i * xStep, toY(values[i]));
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.6 * dpr;
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      ctx.stroke();
+    }
+
+    function refreshSparklines(sid) {
+      const history = (state.servers[sid]?.history || []).slice(-SPARK_POINTS);
+      if (history.length < 2) return;
+
+      drawSparkline(document.getElementById(`sp-cpu-${sid}`), history.map(item => item.cpu_percent ?? 0), '#60a5fa');
+      drawSparkline(document.getElementById(`sp-ram-${sid}`), history.map(item => item.ram_percent ?? 0), '#a78bfa');
+      if (history.some(item => item.gpus?.length)) {
+        drawSparkline(document.getElementById(`sp-gpu-${sid}`), history.map(item => item.gpus?.[0]?.util ?? 0), '#22c55e');
+      }
+    }
+
+    function chartOptions(unit, maxY = 100, legend = false) {
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 280 },
+        interaction: { mode: 'index', intersect: false },
+        scales: {
+          x: {
+            ticks: { color: '#8da2c6', maxTicksLimit: 6, maxRotation: 0, font: { size: 10 } },
+            grid: { color: 'rgba(148, 163, 184, 0.08)' },
+          },
+          y: {
+            min: 0,
+            ...(maxY != null ? { max: maxY } : {}),
+            ticks: {
+              color: '#8da2c6',
+              font: { size: 10 },
+              callback: value => `${value}${unit}`,
+            },
+            grid: { color: 'rgba(148, 163, 184, 0.08)' },
+          },
+        },
+        plugins: {
+          legend: legend ? { labels: { color: '#d4def0', boxWidth: 10, usePointStyle: true } } : { display: false },
+          tooltip: {
+            backgroundColor: '#0f1728',
+            borderColor: 'rgba(148, 163, 184, 0.16)',
+            borderWidth: 1,
+            titleColor: '#e5edf9',
+            bodyColor: '#d4def0',
+            callbacks: {
+              label: context => ` ${context.dataset.label}: ${Number(context.parsed.y).toFixed(1)}${unit}`,
+            },
+          },
+        },
+      };
+    }
+
+    function makeChart(canvasId, datasets, labels, unit = '%', maxY = 100, legend = false) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas || typeof Chart === 'undefined') return null;
+      return new Chart(canvas.getContext('2d'), {
         type: 'line',
         data: {
           labels,
-          datasets: [
-            { label: 'GPU %', data: gpuVals,  borderColor: '#3fb950', backgroundColor: '#3fb95018', borderWidth: 1.5, pointRadius: 0, fill: true, tension: 0.3 },
-            { label: 'VRAM %',data: gpuMVals, borderColor: '#d29922', backgroundColor: '#d2992218', borderWidth: 1.5, pointRadius: 0, fill: true, tension: 0.3 },
-          ],
+          datasets: datasets.map(ds => ({
+            label: ds.label,
+            data: ds.values,
+            borderColor: ds.color,
+            backgroundColor: `${ds.color}22`,
+            pointRadius: 0,
+            borderWidth: 1.8,
+            fill: true,
+            tension: 0.32,
+            spanGaps: true,
+          })),
         },
-        options: gpuOpts,
+        options: chartOptions(unit, maxY, legend),
       });
     }
-  }
 
-  if (hasTemp) {
-    const tempVals = history.map(d => d.cpu_temp ?? 0);
-    charts.temp = makeChart(`ec-temp-${sid}`, [{ label: '°C', values: tempVals, color: '#f85149' }], labels, '°C', null);
-  }
+    function aggregateFleetSeries(limit = FLEET_POINTS) {
+      const histories = Object.values(state.servers)
+        .map(server => server.history || [])
+        .filter(history => history.length);
 
-  if (!s) state.servers[sid] = { history: [], online: true };
-  state.servers[sid].expandCharts = charts;
-
-  if (latest) {
-    renderSensors(latest, document.getElementById(`sensors-${sid}`));
-    updateGpuDetail(sid, latest);
-  }
-}
-
-// Push a new live data point into open expand charts
-function appendToExpandCharts(sid, data) {
-  const s = state.servers[sid];
-  if (!s?.expandCharts) return;
-  const label = fmtTs(data.timestamp);
-  const { cpu, ram, gpu, temp } = s.expandCharts;
-
-  function pushPoint(chart, ...values) {
-    if (!chart) return;
-    chart.data.labels.push(label);
-    values.forEach((v, i) => chart.data.datasets[i]?.data.push(v));
-    // Keep last 1440 points (12h at 30s)
-    if (chart.data.labels.length > 1440) {
-      chart.data.labels.shift();
-      chart.data.datasets.forEach(ds => ds.data.shift());
-    }
-    chart.update('none');
-  }
-
-  pushPoint(cpu, data.cpu_percent ?? 0);
-  pushPoint(ram, data.ram_percent ?? 0);
-  if (gpu) pushPoint(gpu, data.gpus?.[0]?.util ?? 0, data.gpus?.[0]?.mem_percent ?? 0);
-  if (temp && data.cpu_temp != null) pushPoint(temp, data.cpu_temp);
-
-  // Refresh sensor tables and GPU detail in the expanded view
-  const sensorsEl = document.getElementById(`sensors-${sid}`);
-  if (sensorsEl) renderSensors(data, sensorsEl);
-  updateGpuDetail(sid, data);
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Card lifecycle
-// ═══════════════════════════════════════════════════════════════════
-
-function createCard(sid, data) {
-  const card = document.createElement('div');
-  card.id = `card-${sid}`;
-  card.className = 'server-card';
-
-  const body = document.createElement('div');
-  body.className = 'card-body';
-  body.innerHTML = buildCardHTML(sid, data);
-  card.appendChild(body);
-
-  const expand = document.createElement('div');
-  expand.className = 'card-expand';
-  card.appendChild(expand);
-
-  const grid = document.getElementById('server-grid');
-  grid.querySelector('.empty-state')?.remove();
-  grid.appendChild(card);
-
-  requestAnimationFrame(() => refreshSparklines(sid));
-}
-
-function updateCard(sid, data) {
-  const card = document.getElementById(`card-${sid}`);
-  if (!card) { createCard(sid, data); return; }
-
-  const online = state.servers[sid]?.online ?? true;
-  card.className = 'server-card' + (online ? '' : ' offline');
-
-  updateGauge(`${sid}-cpu`, data.cpu_percent ?? 0);
-  updateGauge(`${sid}-ram`, data.ram_percent ?? 0);
-  if (data.gpus?.length) updateGauge(`${sid}-gpu`, data.gpus[0].util ?? 0);
-
-  // Gauge info lines
-  const cols = card.querySelectorAll('.gauge-col');
-  if (cols.length >= 1) {
-    const bestTemp = getBestTemp(data);
-    const cpuInfo = [
-      `<span class="gi-main">${data.cpu_cores ?? '?'} cores</span>`,
-      bestTemp ? `<span style="color:${tempColor(bestTemp.val)}">${bestTemp.val}&deg;C</span>` : '',
-    ].filter(Boolean).join(' &middot; ');
-    const cpuInfoEl = cols[0].querySelector('.gauge-info');
-    if (cpuInfoEl) cpuInfoEl.innerHTML = cpuInfo;
-  }
-  if (cols.length >= 2) {
-    const ramInfo = `<span class="gi-main">${(data.ram_used_gb??0).toFixed(1)}<span style="font-weight:400;color:var(--muted)">/${(data.ram_total_gb??0).toFixed(1)} GB</span></span>`;
-    const ramInfoEl = cols[1].querySelector('.gauge-info');
-    if (ramInfoEl) ramInfoEl.innerHTML = ramInfo;
-  }
-  if (data.gpus?.length && cols.length >= 3) {
-    const g0 = data.gpus[0];
-    const parts = [`<span class="gi-main">${(g0.mem_used_gb??0).toFixed(1)}/${(g0.mem_total_gb??0).toFixed(1)} GB</span>`];
-    if (g0.temp != null) parts.push(`<span style="color:${gpuTempColor(g0.temp)}">${g0.temp}&deg;C</span>`);
-    if (g0.fan_pct != null) parts.push(`<span style="color:${pctColor(g0.fan_pct)}">${g0.fan_pct}%</span>`);
-    const gpuInfoEl = cols[2].querySelector('.gauge-info');
-    if (gpuInfoEl) gpuInfoEl.innerHTML = parts.join(' &middot; ');
-  }
-
-  // Fan chips
-  const fansEl = document.getElementById(`fans-${sid}`);
-  if (fansEl) fansEl.innerHTML = buildFanChipsHTML(data.fans);
-
-  // Sparklines
-  requestAnimationFrame(() => refreshSparklines(sid));
-
-  // Push to open expand charts
-  appendToExpandCharts(sid, data);
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Incoming data
-// ═══════════════════════════════════════════════════════════════════
-
-function onMetric(sid, data) {
-  if (!state.servers[sid]) state.servers[sid] = { history: [], online: true };
-  const cutoff = Date.now() - HISTORY_WINDOW;
-  state.servers[sid].history.push(data);
-  state.servers[sid].history = state.servers[sid].history.filter(d => d.timestamp * 1000 > cutoff);
-  state.servers[sid].online = true;
-  state.servers[sid].lastData = data;
-  updateCard(sid, data);
-  updateHeaderStats();
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Header stats
-// ═══════════════════════════════════════════════════════════════════
-
-function updateHeaderStats() {
-  const count  = Object.keys(state.servers).length;
-  const online = Object.values(state.servers).filter(s => s.online).length;
-  document.getElementById('server-count').textContent =
-    `${online}/${count} serveur${count > 1 ? 's' : ''}`;
-
-  const criticals = [];
-  for (const [, s] of Object.entries(state.servers)) {
-    if (!s.online || !s.lastData) continue;
-    const d = s.lastData;
-    if (d.cpu_percent > 90) criticals.push(`${d.hostname} CPU ${d.cpu_percent}%`);
-    if (d.ram_percent > 90) criticals.push(`${d.hostname} RAM ${d.ram_percent}%`);
-    if (d.gpus?.[0]?.util > 95) criticals.push(`${d.hostname} GPU ${d.gpus[0].util}%`);
-  }
-  const banner = document.getElementById('alert-banner');
-  if (criticals.length) {
-    banner.classList.add('visible');
-    document.getElementById('alert-text').textContent = criticals.slice(0, 3).join(' · ');
-  } else {
-    banner.classList.remove('visible');
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// WebSocket
-// ═══════════════════════════════════════════════════════════════════
-
-function connectWS() {
-  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-  const ws    = new WebSocket(`${proto}://${location.host}/ws`);
-  const badge = document.getElementById('ws-badge');
-
-  ws.onopen = () => {
-    badge.textContent = 'Connecté'; badge.className = 'connected';
-    state.wsRetry = 0;
-  };
-  ws.onmessage = e => {
-    let msg; try { msg = JSON.parse(e.data); } catch { return; }
-    if (msg.type === 'update') onMetric(msg.server_id, msg.data);
-  };
-  ws.onclose = () => {
-    badge.textContent = 'Déconnecté'; badge.className = 'disconnected';
-    const delay = Math.min(1000 * Math.pow(2, state.wsRetry++), 30000);
-    setTimeout(() => { badge.textContent = 'Reconnexion…'; badge.className = 'connecting'; connectWS(); }, delay);
-  };
-  ws.onerror = () => ws.close();
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Initial fetch
-// ═══════════════════════════════════════════════════════════════════
-
-async function fetchInitial() {
-  try {
-    const resp = await fetch('/api/servers');
-    if (!resp.ok) return;
-    const servers = await resp.json();
-    for (const [sid, info] of Object.entries(servers)) {
-      if (!state.servers[sid]) state.servers[sid] = { history: [], online: info.online };
-      state.servers[sid].online = info.online;
-      if (info.latest) { state.servers[sid].lastData = info.latest; updateCard(sid, info.latest); }
-    }
-    updateHeaderStats();
-  } catch (e) { /* not ready */ }
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Clock + offline tick
-// ═══════════════════════════════════════════════════════════════════
-
-function tick() {
-  document.getElementById('clock').textContent = new Date().toLocaleTimeString('fr-FR');
-  const now = Date.now() / 1000;
-  for (const [sid, s] of Object.entries(state.servers)) {
-    const d = s.lastData; if (!d) continue;
-    const wasOnline = s.online;
-    s.online = (now - d.timestamp) < 150;
-    const updEl = document.getElementById(`upd-${sid}`);
-    if (updEl) updEl.textContent = timeAgo(d.timestamp);
-    if (wasOnline !== s.online) {
-      const card = document.getElementById(`card-${sid}`);
-      if (card) {
-        card.classList.toggle('offline', !s.online);
-        const dot = card.querySelector('.status-dot');
-        if (dot) dot.className = `status-dot ${s.online ? 'online' : 'offline'}`;
+      if (!histories.length) {
+        return { labels: [], cpu: [], ram: [], temp: [] };
       }
-      updateHeaderStats();
-    }
-  }
-}
 
-fetchInitial();
-connectWS();
-setInterval(tick, 1000);
-</script>
+      const maxLen = Math.min(limit, Math.max(...histories.map(history => history.length)));
+      const labels = [];
+      const cpu = [];
+      const ram = [];
+      const temp = [];
+
+      for (let offset = maxLen; offset >= 1; offset--) {
+        const points = histories
+          .map(history => history[history.length - offset])
+          .filter(Boolean);
+
+        if (!points.length) continue;
+        labels.push(fmtTs(points[points.length - 1].timestamp));
+        cpu.push(avg(points.map(point => point.cpu_percent ?? 0)));
+        ram.push(avg(points.map(point => point.ram_percent ?? 0)));
+
+        const tempVals = points.map(point => getBestTemp(point)?.value).filter(v => Number.isFinite(v));
+        temp.push(tempVals.length ? avg(tempVals) : null);
+
+      }
+
+      return { labels, cpu, ram, temp };
+    }
+
+    function updateFleetCharts() {
+      const series = aggregateFleetSeries();
+      const hasData = series.labels.length > 0;
+      document.getElementById('no-data-cpu')?.classList.toggle('hidden', hasData);
+      document.getElementById('no-data-ram')?.classList.toggle('hidden', hasData);
+      document.getElementById('no-data-temp')?.classList.toggle('hidden', hasData);
+
+      const defs = [
+        { key: 'cpu', canvas: 'fleet-cpu-chart', unit: '%', maxY: 100, color: '#38bdf8', currentId: 'fleet-cpu-current', values: series.cpu, label: 'CPU' },
+        { key: 'ram', canvas: 'fleet-ram-chart', unit: '%', maxY: 100, color: '#a78bfa', currentId: 'fleet-ram-current', values: series.ram, label: 'RAM' },
+        { key: 'temp', canvas: 'fleet-temp-chart', unit: '°C', maxY: null, color: '#f43f5e', currentId: 'fleet-temp-current', values: series.temp, label: 'Temp' },
+      ];
+
+      defs.forEach(def => {
+        const latest = [...def.values].reverse().find(v => Number.isFinite(v));
+        document.getElementById(def.currentId).textContent = latest != null ? `${latest.toFixed(1)}${def.unit}` : '—';
+
+        if (!state.fleetCharts[def.key]) {
+          state.fleetCharts[def.key] = makeChart(def.canvas, [{ label: def.label, values: def.values, color: def.color }], series.labels, def.unit, def.maxY);
+        } else {
+          const chart = state.fleetCharts[def.key];
+          chart.data.labels = series.labels;
+          chart.data.datasets[0].data = def.values;
+          chart.update('none');
+        }
+      });
+    }
+
+    function buildExpandHTML(sid, data, history) {
+      const hasGpu = history.some(item => item.gpus?.length);
+      const hasTemp = history.some(item => item.cpu_temp != null || getBestTemp(item));
+      const hasGpuFan = history.some(item => item.gpus?.[0]?.fan_pct != null);
+      const fanKeys = [...new Set(history.flatMap(item => Object.keys(item.fan_percentages || {})))].slice(0, 6);
+      const hasSystemFanPct = fanKeys.length > 0;
+
+      const summaryTiles = [
+        { label: 'CPU', value: `${Math.round(data.cpu_percent ?? 0)}%`, cls: pctClass(data.cpu_percent ?? 0) },
+        { label: 'RAM', value: `${Math.round(data.ram_percent ?? 0)}%`, cls: pctClass(data.ram_percent ?? 0) },
+        { label: 'CPU temp', value: getBestTemp(data) ? `${getBestTemp(data).value}°C` : 'n/a', cls: tempClass(getBestTemp(data)?.value) },
+      ];
+      if (data?.gpus?.[0]) {
+        summaryTiles.push(
+          { label: 'GPU', value: `${Math.round(data.gpus[0].util ?? 0)}%`, cls: pctClass(data.gpus[0].util ?? 0) },
+          { label: 'VRAM', value: `${Math.round(data.gpus[0].mem_percent ?? 0)}%`, cls: pctClass(data.gpus[0].mem_percent ?? 0) },
+          { label: 'GPU fan', value: data.gpus[0].fan_pct != null ? `${data.gpus[0].fan_pct}%` : 'n/a', cls: pctClass(data.gpus[0].fan_pct) }
+        );
+      }
+      const avgFan = getAverageFanPct(data);
+      if (avgFan != null) summaryTiles.push({ label: 'SYS fan', value: `${avgFan.toFixed(1)}%`, cls: pctClass(avgFan) });
+
+      return {
+        html: `
+          <div class="expand-summary">
+            ${summaryTiles.map(tile => `
+              <div class="summary-tile">
+                <div class="label">${escHtml(tile.label)}</div>
+                <div class="value ${tile.cls}">${escHtml(tile.value)}</div>
+              </div>`).join('')}
+          </div>
+
+          <div class="detail-grid">
+            <div class="detail-card">
+              <h4 class="detail-title">CPU</h4>
+              <canvas id="detail-cpu-${sid}"></canvas>
+              <div class="detail-caption">CPU utilization over local history.</div>
+            </div>
+            <div class="detail-card">
+              <h4 class="detail-title">RAM</h4>
+              <canvas id="detail-ram-${sid}"></canvas>
+              <div class="detail-caption">Memory pressure and system consumption.</div>
+            </div>
+            ${hasGpu ? `
+              <div class="detail-card">
+                <h4 class="detail-title">GPU & VRAM</h4>
+                <canvas id="detail-gpu-${sid}"></canvas>
+                <div class="detail-caption">GPU load and video memory saturation.</div>
+              </div>` : ''}
+            ${hasTemp ? `
+              <div class="detail-card">
+                <h4 class="detail-title">Thermique CPU</h4>
+                <canvas id="detail-temp-${sid}"></canvas>
+                <div class="detail-caption">Temperature from the most representative sensors.</div>
+              </div>` : ''}
+            ${hasGpuFan ? `
+              <div class="detail-card">
+                <h4 class="detail-title">Ventilateur GPU</h4>
+                <canvas id="detail-gpufan-${sid}"></canvas>
+                <div class="detail-caption">GPU fan percentage over time.</div>
+              </div>` : ''}
+            ${hasSystemFanPct ? `
+              <div class="detail-card">
+                <h4 class="detail-title">Ventilateurs carte mère</h4>
+                <canvas id="detail-fans-${sid}"></canvas>
+                <div class="detail-caption">PWM channels exposed by the machine.</div>
+              </div>` : ''}
+          </div>
+
+          <div class="sensor-panels" id="sensor-panels-${sid}"></div>`,
+        fanKeys,
+        hasGpu,
+        hasTemp,
+        hasGpuFan,
+        hasSystemFanPct,
+      };
+    }
+
+    function renderSensors(data, container) {
+      if (!container) return;
+      const temps = Object.entries(data?.temps || {});
+      const fans = Object.entries(data?.fans || {});
+      const fanPercentages = Object.entries(data?.fan_percentages || {});
+
+      const blocks = [];
+
+      if (temps.length) {
+        blocks.push(`
+          <div class="sensor-panel">
+            <h4 class="detail-title">Températures</h4>
+            <div class="sensor-grid">
+              ${temps.map(([key, value]) => `
+                <div class="sensor-item">
+                  <div class="name">${escHtml(prettifyLabel(key))}</div>
+                  <div class="value" style="color:${tempColor(value)}">${escHtml(value)}°C</div>
+                </div>`).join('')}
+            </div>
+          </div>`);
+      }
+
+      if (fans.length || fanPercentages.length) {
+        const mergedKeys = [...new Set([...fans.map(([key]) => key), ...fanPercentages.map(([key]) => key)])];
+        blocks.push(`
+          <div class="sensor-panel">
+            <h4 class="detail-title">Ventilateurs</h4>
+            <div class="sensor-grid">
+              ${mergedKeys.map(key => {
+                const rpm = data.fans?.[key];
+                const pct = data.fan_percentages?.[key];
+                const rpmColor = rpm == null ? '#8da2c6' : rpm === 0 ? '#8da2c6' : rpm < 600 ? '#f59e0b' : '#60a5fa';
+                return `
+                  <div class="sensor-item">
+                    <div class="name">${escHtml(prettifyLabel(key))}</div>
+                    <div class="value" style="color:${rpm != null ? rpmColor : pctColor(pct)}">${rpm != null ? `${rpm} rpm` : ''}${rpm != null && pct != null ? ' · ' : ''}${pct != null ? `${pct}%` : ''}</div>
+                  </div>`;
+              }).join('')}
+            </div>
+          </div>`);
+      }
+
+      container.innerHTML = blocks.join('');
+    }
+
+    function destroyExpandCharts(server) {
+      if (!server?.expandCharts) return;
+      Object.values(server.expandCharts).forEach(chart => chart?.destroy?.());
+      server.expandCharts = null;
+    }
+
+    async function toggleExpand(sid) {
+      const card = document.getElementById(`card-${sid}`);
+      if (!card) return;
+
+      const server = state.servers[sid];
+      const body = card.querySelector('.card-body');
+      const expand = card.querySelector('.card-expand');
+      const isOpen = expand.classList.contains('open');
+
+      if (isOpen) {
+        expand.classList.remove('open');
+        destroyExpandCharts(server);
+        expand.innerHTML = '';
+        body.innerHTML = buildCardHTML(sid, server.lastData, false);
+        requestAnimationFrame(() => refreshSparklines(sid));
+        return;
+      }
+
+      let history = server.history || [];
+      try {
+        const response = await fetch(`/api/history/${encodeURIComponent(sid)}`);
+        if (response.ok) history = await response.json();
+      } catch (_) {}
+
+      if (!history.length && server.lastData) history = [server.lastData];
+      const latest = history[history.length - 1] || server.lastData;
+      const detail = buildExpandHTML(sid, latest, history);
+
+      body.innerHTML = buildCardHTML(sid, latest, true);
+      expand.classList.add('open');
+      expand.innerHTML = `<div class="expand-inner">${detail.html}</div>`;
+
+      const labels = history.map(item => fmtTs(item.timestamp));
+      const charts = {
+        cpu: makeChart(`detail-cpu-${sid}`, [{ label: 'CPU', values: history.map(item => item.cpu_percent ?? 0), color: '#60a5fa' }], labels, '%', 100),
+        ram: makeChart(`detail-ram-${sid}`, [{ label: 'RAM', values: history.map(item => item.ram_percent ?? 0), color: '#a78bfa' }], labels, '%', 100),
+      };
+
+      if (detail.hasGpu) {
+        charts.gpu = makeChart(`detail-gpu-${sid}`,
+          [
+            { label: 'GPU', values: history.map(item => item.gpus?.[0]?.util ?? 0), color: '#22c55e' },
+            { label: 'VRAM', values: history.map(item => item.gpus?.[0]?.mem_percent ?? 0), color: '#f59e0b' },
+          ],
+          labels,
+          '%',
+          100,
+          true
+        );
+      }
+
+      if (detail.hasTemp) {
+        charts.temp = makeChart(`detail-temp-${sid}`, [{ label: 'Temp', values: history.map(item => getBestTemp(item)?.value ?? null), color: '#ef4444' }], labels, '°C', null);
+      }
+
+      if (detail.hasGpuFan) {
+        charts.gpuFan = makeChart(`detail-gpufan-${sid}`, [{ label: 'GPU fan', values: history.map(item => item.gpus?.[0]?.fan_pct ?? null), color: '#f472b6' }], labels, '%', 100);
+      }
+
+      if (detail.hasSystemFanPct) {
+        const colors = ['#22d3ee', '#60a5fa', '#34d399', '#f59e0b', '#a78bfa', '#fb7185'];
+        charts.systemFans = makeChart(
+          `detail-fans-${sid}`,
+          detail.fanKeys.map((key, index) => ({
+            label: prettifyLabel(key),
+            values: history.map(item => item.fan_percentages?.[key] ?? null),
+            color: colors[index % colors.length],
+          })),
+          labels,
+          '%',
+          100,
+          true
+        );
+      }
+
+      server.expandCharts = charts;
+      server.expandFanKeys = detail.fanKeys;
+      renderSensors(latest, document.getElementById(`sensor-panels-${sid}`));
+      requestAnimationFrame(() => refreshSparklines(sid));
+    }
+
+    function appendToExpandCharts(sid, data) {
+      const server = state.servers[sid];
+      if (!server?.expandCharts) return;
+
+      const label = fmtTs(data.timestamp);
+      const push = (chart, values) => {
+        if (!chart) return;
+        chart.data.labels.push(label);
+        values.forEach((value, index) => chart.data.datasets[index]?.data.push(value));
+        if (chart.data.labels.length > 1440) {
+          chart.data.labels.shift();
+          chart.data.datasets.forEach(dataset => dataset.data.shift());
+        }
+        chart.update('none');
+      };
+
+      push(server.expandCharts.cpu, [data.cpu_percent ?? 0]);
+      push(server.expandCharts.ram, [data.ram_percent ?? 0]);
+      push(server.expandCharts.gpu, [data.gpus?.[0]?.util ?? 0, data.gpus?.[0]?.mem_percent ?? 0]);
+      push(server.expandCharts.temp, [getBestTemp(data)?.value ?? null]);
+      push(server.expandCharts.gpuFan, [data.gpus?.[0]?.fan_pct ?? null]);
+
+      if (server.expandCharts.systemFans) {
+        const chart = server.expandCharts.systemFans;
+        chart.data.labels.push(label);
+        chart.data.datasets.forEach((dataset, index) => {
+          const key = server.expandFanKeys?.[index];
+          dataset.data.push(key ? (data.fan_percentages?.[key] ?? null) : null);
+        });
+        if (chart.data.labels.length > 1440) {
+          chart.data.labels.shift();
+          chart.data.datasets.forEach(dataset => dataset.data.shift());
+        }
+        chart.update('none');
+      }
+
+      renderSensors(data, document.getElementById(`sensor-panels-${sid}`));
+    }
+
+    function cardOrderValue(server) {
+      const severity = getServerSeverity(server.lastData, server.online);
+      const sort = state.filters.sort || 'severity';
+      if (sort === 'name') {
+        const name = (server.lastData?.hostname || server.lastData?.server_id || '').toLowerCase();
+        let hash = 0;
+        for (let i = 0; i < name.length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i);
+        return hash;
+      }
+      if (sort === 'cpu') {
+        return 10000 - Math.round(server.lastData?.cpu_percent ?? 0);
+      }
+      if (sort === 'ram') {
+        return 10000 - Math.round(server.lastData?.ram_percent ?? 0);
+      }
+      if (sort === 'temp') {
+        return 10000 - Math.round(getBestTemp(server.lastData)?.value ?? 0);
+      }
+      const base = severity === 'critical' ? 0 : severity === 'warning' ? 1000 : server.online ? 2000 : 3000;
+      const load = 100 - Math.round((server.lastData?.cpu_percent ?? 0) + (server.lastData?.gpus?.[0]?.util ?? 0) * 0.2);
+      return base + load;
+    }
+
+    function createCard(sid, data) {
+      const grid = document.getElementById('server-grid');
+      grid.querySelector('.empty-state')?.remove();
+
+      const card = document.createElement('article');
+      card.id = `card-${sid}`;
+      card.className = 'server-card fade-in';
+      card.innerHTML = '<div class="card-body"></div><div class="card-expand"></div>';
+      grid.appendChild(card);
+      requestAnimationFrame(() => updateCard(sid, data));
+    }
+
+    function updateCard(sid, data) {
+      const server = state.servers[sid];
+      let card = document.getElementById(`card-${sid}`);
+      if (!card) {
+        createCard(sid, data);
+        return;
+      }
+
+      const expand = card.querySelector('.card-expand');
+      const isOpen = expand.classList.contains('open');
+      const severity = getServerSeverity(data, server.online);
+      const hadFade = card.classList.contains('fade-in');
+      card.className = `server-card${hadFade ? ' fade-in' : ''}${server.online ? '' : ' offline'}${severity === 'warning' ? ' warning' : ''}${severity === 'critical' ? ' critical' : ''}`;
+      card.style.order = String(cardOrderValue(server));
+      card.querySelector('.card-body').innerHTML = buildCardHTML(sid, data, isOpen);
+
+      requestAnimationFrame(() => refreshSparklines(sid));
+      appendToExpandCharts(sid, data);
+    }
+
+    function ensureEmptyState() {
+      const grid = document.getElementById('server-grid');
+      const visibleCards = [...grid.querySelectorAll('.server-card')].filter(card => !card.classList.contains('hidden')).length;
+      let empty = grid.querySelector('.empty-state');
+      if (!visibleCards) {
+        if (!empty) {
+          empty = document.createElement('div');
+          empty.className = 'empty-state';
+          empty.innerHTML = '<strong>No matching servers</strong>Adjust your search or change the filter.';
+          grid.appendChild(empty);
+        }
+      } else {
+        empty?.remove();
+      }
+    }
+
+    function setEmptyState(title, message) {
+      const grid = document.getElementById('server-grid');
+      let empty = grid.querySelector('.empty-state');
+      if (!empty) {
+        empty = document.createElement('div');
+        empty.className = 'empty-state';
+        grid.appendChild(empty);
+      }
+      empty.innerHTML = `<strong>${escHtml(title)}</strong>${escHtml(message)}`;
+    }
+
+    function setApiStatus(text) {
+      const api = document.getElementById('side-api');
+      if (api) api.textContent = text;
+    }
+
+    function hasDashboardOrigin() {
+      return ['http:', 'https:'].includes(location.protocol) && Boolean(location.host);
+    }
+
+    function setFilterMode(mode) {
+      state.filters.mode = mode || 'all';
+      document.querySelectorAll('.filter-group .filter-pill').forEach(item => {
+        item.classList.toggle('active', item.dataset.filter === state.filters.mode);
+      });
+    }
+
+    function setSortMode(mode) {
+      state.filters.sort = mode || 'severity';
+      document.querySelectorAll('.sort-group .filter-pill').forEach(item => {
+        item.classList.toggle('active', item.dataset.sort === state.filters.sort);
+      });
+    }
+
+    function applyFilters() {
+      for (const [sid, server] of Object.entries(state.servers)) {
+        const card = document.getElementById(`card-${sid}`);
+        if (!card || !server.lastData) continue;
+        const visible = matchesFilters(sid, server);
+        card.classList.toggle('hidden', !visible);
+        if (visible) card.style.order = String(cardOrderValue(server));
+      }
+      ensureEmptyState();
+    }
+
+    function drawKpiSpark(canvasId, values, color) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas || values.length < 2) return;
+      drawSparkline(canvas, values, color);
+    }
+
+    function updateChrome() {
+      const entries = Object.entries(state.servers).filter(([, server]) => server.lastData);
+      const total = entries.length;
+      const onlineEntries = entries.filter(([, server]) => server.online);
+      const online = onlineEntries.length;
+      const alerts = onlineEntries.filter(([, server]) => ['warning', 'critical'].includes(getServerSeverity(server.lastData, server.online)));
+      const cpuAvg = avg(onlineEntries.map(([, server]) => server.lastData.cpu_percent ?? 0));
+      const ramAvg = avg(onlineEntries.map(([, server]) => server.lastData.ram_percent ?? 0));
+      const hottest = onlineEntries
+        .map(([sid, server]) => ({ sid, temp: getBestTemp(server.lastData)?.value ?? null }))
+        .filter(item => item.temp != null)
+        .sort((a, b) => b.temp - a.temp)[0];
+      const gpuEntries = onlineEntries.filter(([, server]) => server.lastData.gpus?.length);
+      const gpuAvg = gpuEntries.length ? avg(gpuEntries.map(([, server]) => server.lastData.gpus[0].util ?? 0)) : null;
+      const vramAvg = gpuEntries.length ? avg(gpuEntries.map(([, server]) => server.lastData.gpus[0].mem_percent ?? 0)) : null;
+
+      document.getElementById('server-count').innerHTML = `<strong>${online}/${total}</strong> hosts`;
+      const incidentPill = document.getElementById('incident-pill');
+      incidentPill.className = `pill ${alerts.length ? (alerts.some(([, s]) => getServerSeverity(s.lastData, s.online) === 'critical') ? 'bad' : 'warn') : ''}`.trim();
+      incidentPill.textContent = alerts.length ? `${alerts.length} alert${alerts.length > 1 ? 's' : ''}` : 'No alerts';
+
+      document.getElementById('kpi-online').textContent = `${online} / ${total}`;
+      document.getElementById('kpi-online-foot').textContent = total ? `${alerts.length} host${alerts.length > 1 ? 's' : ''} need attention.` : 'No servers detected.';
+      document.getElementById('kpi-online-bar').style.width = `${total ? (online / total) * 100 : 0}%`;
+
+      document.getElementById('kpi-cpu').textContent = `${cpuAvg.toFixed(1)}%`;
+      document.getElementById('kpi-cpu-foot').textContent = `Avg across ${online} hosts`;
+      const cpuBar = document.getElementById('kpi-cpu-bar');
+      if (cpuBar) cpuBar.style.width = `${clamp(cpuAvg, 0, 100)}%`;
+
+      document.getElementById('kpi-ram').textContent = `${ramAvg.toFixed(1)}%`;
+      document.getElementById('kpi-ram-foot').textContent = `Memory pressure across fleet`;
+      const ramBar = document.getElementById('kpi-ram-bar');
+      if (ramBar) ramBar.style.width = `${clamp(ramAvg, 0, 100)}%`;
+
+      document.getElementById('kpi-temp').textContent = hottest ? `${hottest.temp.toFixed(1)}°C` : '—';
+      document.getElementById('kpi-temp-foot').textContent = hottest ? `${hottest.sid} · hottest sensor` : 'No temperature data';
+
+      if (gpuEntries.length) {
+        document.getElementById('kpi-gpu').textContent = `${Math.round(gpuAvg ?? 0)}% / ${Math.round(vramAvg ?? 0)}%`;
+        document.getElementById('kpi-gpu-foot').textContent = `GPU load / VRAM on ${gpuEntries.length} host${gpuEntries.length > 1 ? 's' : ''}`;
+      } else {
+        document.getElementById('kpi-gpu').textContent = '—';
+        document.getElementById('kpi-gpu-foot').textContent = 'No GPU data available';
+      }
+
+      document.getElementById('kpi-alerts').textContent = String(alerts.length);
+      document.getElementById('kpi-alerts-foot').textContent = alerts.length ? `${alerts.length} host${alerts.length > 1 ? 's' : ''} flagged` : 'All systems healthy';
+      document.getElementById('kpi-alerts-bar').style.width = `${total ? (alerts.length / total) * 100 : 0}%`;
+
+      document.getElementById('side-online').textContent = `${online} / ${total}`;
+      document.getElementById('side-alerts').textContent = String(alerts.length);
+      document.getElementById('side-cpu').textContent = `${cpuAvg.toFixed(1)}%`;
+      document.getElementById('side-hottest').textContent = hottest ? `${hottest.sid} · ${hottest.temp}°C` : '—';
+      document.getElementById('side-last').textContent = new Date().toLocaleTimeString();
+
+      state.kpiHistory.cpu.push(cpuAvg);
+      state.kpiHistory.ram.push(ramAvg);
+      state.kpiHistory.temp.push(hottest?.temp ?? null);
+      state.kpiHistory.gpu.push(gpuAvg ?? null);
+      if (state.kpiHistory.cpu.length > 40) state.kpiHistory.cpu.shift();
+      if (state.kpiHistory.ram.length > 40) state.kpiHistory.ram.shift();
+      if (state.kpiHistory.temp.length > 40) state.kpiHistory.temp.shift();
+      if (state.kpiHistory.gpu.length > 40) state.kpiHistory.gpu.shift();
+
+      drawKpiSpark('kpi-cpu-spark', state.kpiHistory.cpu, '#38bdf8');
+      drawKpiSpark('kpi-ram-spark', state.kpiHistory.ram, '#a78bfa');
+      drawKpiSpark('kpi-temp-spark', state.kpiHistory.temp.filter(v => v != null), '#f43f5e');
+      drawKpiSpark('kpi-gpu-spark', state.kpiHistory.gpu.filter(v => v != null), '#22c55e');
+
+      updateFleetCharts();
+    }
+
+    function onMetric(sid, data) {
+      if (!state.servers[sid]) state.servers[sid] = { history: [], online: true, lastData: null, expandCharts: null, expandFanKeys: [] };
+      const cutoff = Date.now() - HISTORY_WINDOW;
+      state.servers[sid].history.push(data);
+      state.servers[sid].history = state.servers[sid].history.filter(item => item.timestamp * 1000 > cutoff);
+      state.servers[sid].online = true;
+      state.servers[sid].lastData = data;
+      updateCard(sid, data);
+      updateChrome();
+      applyFilters();
+    }
+
+    function connectWS() {
+      if (!hasDashboardOrigin()) return;
+      const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+      const badge = document.getElementById('ws-badge');
+      let ws;
+
+      try {
+        ws = new WebSocket(`${proto}://${location.host}/ws`);
+      } catch (error) {
+        console.error('WebSocket bootstrap failed', error);
+        badge.textContent = 'Unavailable';
+        badge.className = 'pill warn live-pill';
+        setApiStatus('Invalid origin');
+        return;
+      }
+
+      ws.onopen = () => {
+        badge.innerHTML = '<span class="live-dot"></span> Live';
+        badge.className = 'pill ok live-pill';
+        state.wsRetry = 0;
+        setApiStatus('HTTP OK / WS live');
+      };
+
+      ws.onmessage = event => {
+        let msg;
+        try { msg = JSON.parse(event.data); } catch (_) { return; }
+        if (msg.type === 'update') onMetric(msg.server_id, msg.data);
+      };
+
+      ws.onclose = () => {
+        badge.textContent = 'Disconnected';
+        badge.className = 'pill bad live-pill';
+        setApiStatus('HTTP OK / WS retry');
+        const delay = Math.min(1000 * Math.pow(2, state.wsRetry++), 30000);
+        setTimeout(() => {
+          badge.textContent = 'Reconnecting…';
+          badge.className = 'pill warn';
+          connectWS();
+        }, delay);
+      };
+
+      ws.onerror = () => ws.close();
+    }
+
+    async function fetchInitial() {
+      if (!hasDashboardOrigin()) return;
+      try {
+        const response = await fetch('/api/servers');
+        if (!response.ok) {
+          setApiStatus(`HTTP ${response.status}`);
+          setEmptyState('API unreachable', 'Open the dashboard through the monitor server URL, not as a standalone HTML file.');
+          return;
+        }
+        setApiStatus('HTTP OK');
+        const servers = await response.json();
+        for (const [sid, info] of Object.entries(servers)) {
+          if (!state.servers[sid]) state.servers[sid] = { history: [], online: info.online, lastData: null, expandCharts: null, expandFanKeys: [] };
+          state.servers[sid].online = info.online;
+          if (info.latest) {
+            state.servers[sid].lastData = info.latest;
+            if (!state.servers[sid].history.length) state.servers[sid].history.push(info.latest);
+            updateCard(sid, info.latest);
+          }
+        }
+        updateChrome();
+        applyFilters();
+      } catch (error) {
+        console.error('Initial fetch failed', error);
+        setApiStatus('HTTP error');
+        setEmptyState('API unreachable', 'Open the dashboard through the monitor server URL, not as a standalone HTML file.');
+      }
+    }
+
+    function tick() {
+      const now = Date.now() / 1000;
+
+      let changed = false;
+      for (const [sid, server] of Object.entries(state.servers)) {
+        const data = server.lastData;
+        if (!data) continue;
+        const wasOnline = server.online;
+        server.online = (now - data.timestamp) < 150;
+        const upd = document.getElementById(`upd-${sid}`);
+        if (upd) upd.textContent = timeAgo(data.timestamp);
+        if (wasOnline !== server.online) {
+          updateCard(sid, data);
+          changed = true;
+        }
+      }
+
+      if (changed) {
+        updateChrome();
+        applyFilters();
+      }
+    }
+
+    document.getElementById('search-input').addEventListener('input', event => {
+      state.filters.query = event.target.value || '';
+      applyFilters();
+    });
+
+    document.querySelectorAll('.filter-group .filter-pill').forEach(button => {
+      button.addEventListener('click', () => {
+        setFilterMode(button.dataset.filter || 'all');
+        applyFilters();
+      });
+    });
+
+    document.querySelectorAll('.sort-group .filter-pill').forEach(button => {
+      button.addEventListener('click', () => {
+        setSortMode(button.dataset.sort || 'severity');
+        applyFilters();
+      });
+    });
+
+    document.querySelectorAll('.side-nav a').forEach(link => {
+      link.addEventListener('click', () => {
+        document.querySelectorAll('.side-nav a').forEach(item => item.classList.toggle('active', item === link));
+        if (link.dataset.navFilter) {
+          setFilterMode(link.dataset.navFilter);
+          applyFilters();
+        }
+      });
+    });
+
+    document.getElementById('refresh-btn').addEventListener('click', () => {
+      const btn = document.getElementById('refresh-btn');
+      btn.classList.add('spin');
+      setTimeout(() => btn.classList.remove('spin'), 700);
+      fetchInitial();
+    });
+
+    window.toggleExpand = toggleExpand;
+
+    if (!hasDashboardOrigin()) {
+      setApiStatus('Invalid origin');
+      setEmptyState('API unreachable', 'Open the dashboard through the monitor server URL, not the raw index.html file.');
+    }
+
+    fetchInitial();
+    connectWS();
+    setInterval(tick, 1000);
+  </script>
 </body>
 </html>

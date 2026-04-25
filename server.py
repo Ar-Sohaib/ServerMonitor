@@ -17,7 +17,7 @@ from collections import defaultdict, deque
 from typing import Any, Optional
 
 import uvicorn
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -33,6 +33,17 @@ server_registry: dict[str, dict] = {}
 ws_clients: set[WebSocket] = set()
 
 
+@app.middleware("http")
+async def disable_browser_cache(request: Request, call_next):
+    response = await call_next(request)
+    path = request.url.path
+    if path == "/" or path.startswith("/api/") or path.endswith(".html"):
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+    return response
+
+
 class Metrics(BaseModel):
     server_id: str
     hostname: str
@@ -46,6 +57,7 @@ class Metrics(BaseModel):
     cpu_temp: Optional[float] = None
     temps: Optional[dict] = None   # all labeled temperature sensors from hwmon
     fans: Optional[dict] = None    # all fan RPMs from hwmon
+    fan_percentages: Optional[dict] = None  # all fan controller duty cycles in %
     gpus: Optional[list[Any]] = None
 
 
