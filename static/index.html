@@ -45,12 +45,9 @@
       --panel-2: var(--bg-panel-hover);
     }
 
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { margin: 0; padding: 0; }
-
-    html {
-      scroll-behavior: smooth;
-    }
+    html { scroll-behavior: smooth; }
 
     body {
       min-height: 100vh;
@@ -60,13 +57,12 @@
         radial-gradient(circle at top left, rgba(96, 165, 250, 0.14), transparent 24%),
         radial-gradient(circle at top right, rgba(167, 139, 250, 0.11), transparent 22%),
         linear-gradient(180deg, #070b14 0%, #0a101d 42%, #09121f 100%);
+      overflow-x: hidden;
     }
 
     body::before {
       content: '';
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
+      position: fixed; inset: 0; pointer-events: none;
       background-image:
         linear-gradient(rgba(148, 163, 184, 0.035) 1px, transparent 1px),
         linear-gradient(90deg, rgba(148, 163, 184, 0.035) 1px, transparent 1px);
@@ -74,1026 +70,1134 @@
       mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.45), transparent);
     }
 
+    /* ── App Shell ── */
     .app-shell {
       display: grid;
-      grid-template-columns: 220px minmax(0, 1fr);
+      grid-template-columns: 280px minmax(0, 1fr);
       min-height: 100vh;
     }
 
+    /* ── Sidebar ── */
     .sidebar {
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      padding: 18px 16px;
+      position: sticky; top: 0; height: 100vh;
+      display: flex; flex-direction: column;
       background: var(--bg-sidebar);
       border-right: 1px solid var(--border-soft);
-      backdrop-filter: blur(14px);
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
+      overflow: hidden;
     }
 
+    .sidebar-header { padding: 18px 16px 12px; flex-shrink: 0; }
+
     .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 12px;
-      border-radius: 16px;
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 12px; border-radius: 16px;
       background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(10, 16, 28, 0.96));
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      margin-bottom: 16px;
+      border: 1px solid var(--border); box-shadow: var(--shadow);
     }
 
     .brand-mark {
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
-      display: grid;
-      place-items: center;
-      color: #dcecff;
+      width: 44px; height: 44px; border-radius: 14px;
+      display: grid; place-items: center; color: #dcecff;
       background: linear-gradient(135deg, rgba(59, 130, 246, 0.22), rgba(34, 211, 238, 0.18));
-      border: 1px solid rgba(96, 165, 250, 0.2);
-      flex-shrink: 0;
+      border: 1px solid rgba(96, 165, 250, 0.2); flex-shrink: 0;
     }
 
+    .brand-copy { min-width: 0; flex: 1; overflow: hidden; }
+
     .brand-copy h1 {
-      margin: 0;
-      font-size: 1rem;
-      letter-spacing: 0.02em;
+      margin: 0; font-size: 1rem; letter-spacing: 0.02em;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
 
     .brand-copy p {
-      margin: 4px 0 0;
-      color: var(--muted);
-      font-size: 0.76rem;
-      line-height: 1.4;
+      margin: 4px 0 0; color: var(--muted); font-size: 0.72rem; line-height: 1.4;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
 
-    .side-section {
-      margin-bottom: 14px;
-      padding: 14px;
-      border-radius: 16px;
-      background: linear-gradient(180deg, rgba(15, 23, 42, 0.9), rgba(10, 16, 28, 0.92));
-      border: 1px solid var(--border);
-    }
-
+    /* Fleet Summary */
+    .side-section { padding: 12px 16px; flex-shrink: 0; }
     .side-title {
-      margin: 0 0 10px;
-      color: var(--muted);
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-weight: 800;
+      margin: 0 0 8px; color: var(--muted); font-size: 0.68rem;
+      text-transform: uppercase; letter-spacing: 0.08em; font-weight: 800;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
 
-    .side-metrics {
-      display: grid;
-      gap: 8px;
-    }
-
+    .side-metrics { display: grid; gap: 6px; }
     .side-metric {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 9px 10px;
-      border-radius: 12px;
-      background: rgba(8, 13, 26, 0.72);
-      border: 1px solid rgba(148, 163, 184, 0.08);
-      color: var(--muted);
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 8px 10px; border-radius: 10px;
+      background: rgba(8, 13, 26, 0.72); border: 1px solid rgba(148, 163, 184, 0.08);
+      color: var(--muted); overflow: hidden;
+    }
+    .side-metric span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.74rem; }
+    .side-metric strong { color: var(--text-primary); font-weight: 700; font-size: 0.78rem; white-space: nowrap; }
+
+    /* ── Server List (scrollable) ── */
+    .server-list-section {
+      flex: 1; min-height: 0; display: flex; flex-direction: column;
+      padding: 0 16px 8px; overflow: hidden;
+    }
+    .server-list-section .side-title { padding-top: 8px; margin-bottom: 8px; }
+
+    .server-list {
+      flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden;
+      display: flex; flex-direction: column; gap: 4px; padding-right: 4px;
+      scrollbar-width: thin; scrollbar-color: rgba(148, 163, 184, 0.2) transparent;
+    }
+    .server-list::-webkit-scrollbar { width: 5px; }
+    .server-list::-webkit-scrollbar-track { background: transparent; }
+    .server-list::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.2); border-radius: 999px; }
+
+    .server-list-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 12px;
+      background: rgba(8, 13, 26, 0.5); border: 1px solid transparent;
+      cursor: pointer; transition: all 160ms ease; min-width: 0; overflow: hidden;
+    }
+    .server-list-item:hover { background: rgba(15, 23, 42, 0.7); border-color: var(--border-soft); }
+    .server-list-item.active { background: rgba(17, 39, 87, 0.42); border-color: rgba(96, 165, 250, 0.24); }
+    .server-list-item.offline { opacity: 0.55; }
+
+    .server-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .server-status-dot.online { background: var(--green); }
+    .server-status-dot.warning { background: var(--yellow); }
+    .server-status-dot.critical { background: var(--red); }
+    .server-status-dot.offline { background: var(--status-offline); }
+
+    .server-list-info { flex: 1; min-width: 0; overflow: hidden; }
+    .server-list-name {
+      font-size: 0.82rem; font-weight: 600; color: var(--text-primary);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .server-list-meta {
+      display: flex; gap: 8px; margin-top: 2px; font-size: 0.68rem; color: var(--text-muted);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .server-list-meta span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .server-list-bars { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; width: 48px; }
+    .server-list-bar { height: 4px; border-radius: 999px; background: rgba(148, 163, 184, 0.1); overflow: hidden; }
+    .server-list-bar span { display: block; height: 100%; border-radius: inherit; transition: width 280ms ease; }
+
+    .server-list-empty {
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px 12px; color: var(--text-muted); font-size: 0.74rem; text-align: center;
     }
 
-    .side-metric strong {
-      color: var(--text-primary);
-      font-weight: 700;
-    }
-
-    .side-nav {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      display: grid;
-      gap: 4px;
-    }
-
-    .side-nav li a {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 9px 10px;
-      border-radius: 12px;
-      color: var(--text-secondary);
-      font-size: 0.82rem;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 160ms ease;
-      cursor: pointer;
-    }
-
-    .side-nav li a:hover,
-    .side-nav li a.active {
-      color: var(--text-primary);
-      background: rgba(15, 23, 42, 0.7);
-      border: 1px solid var(--border-soft);
-    }
-
-    .side-nav li a svg {
-      width: 16px;
-      height: 16px;
-      flex-shrink: 0;
-    }
-
+    /* Sidebar Footer */
     .side-footer {
-      margin-top: auto;
-      padding-top: 14px;
-      border-top: 1px solid var(--border-soft);
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      display: grid;
-      gap: 6px;
+      padding: 12px 16px; border-top: 1px solid var(--border-soft);
+      font-size: 0.68rem; color: var(--text-muted); display: grid; gap: 4px; flex-shrink: 0;
     }
+    .side-footer strong { color: var(--text-secondary); }
 
-    .side-footer strong {
-      color: var(--text-secondary);
-    }
-
-    .workspace {
-      padding: 18px;
-      min-width: 0;
-    }
+    /* ── Workspace ── */
+    .workspace { padding: 18px; min-width: 0; overflow-x: hidden; }
 
     .topbar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 14px 16px;
-      border-radius: 18px;
-      background: rgba(10, 16, 28, 0.74);
-      border: 1px solid var(--border);
-      backdrop-filter: blur(14px);
-      position: sticky;
-      top: 10px;
-      z-index: 30;
-      box-shadow: var(--shadow);
+      display: flex; align-items: center; gap: 10px; padding: 14px 16px;
+      border-radius: 18px; background: rgba(10, 16, 28, 0.74);
+      border: 1px solid var(--border); backdrop-filter: blur(14px);
+      position: sticky; top: 10px; z-index: 30; box-shadow: var(--shadow); flex-wrap: wrap;
     }
-
-    .topbar-copy {
-      min-width: 0;
-    }
-
+    .topbar-copy { min-width: 0; flex: 1; overflow: hidden; }
     .topbar-copy h2 {
-      margin: 0;
-      font-size: 1.15rem;
-      letter-spacing: 0.01em;
+      margin: 0; font-size: 1.15rem; letter-spacing: 0.01em;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-
     .topbar-copy p {
-      margin: 4px 0 0;
-      color: var(--muted);
-      font-size: 0.78rem;
+      margin: 4px 0 0; color: var(--muted); font-size: 0.78rem;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-
     .topbar-spacer { flex: 1; }
 
     .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 9px 12px;
-      border-radius: 999px;
-      background: rgba(15, 23, 42, 0.92);
-      border: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 0.76rem;
-      font-weight: 700;
-      white-space: nowrap;
+      display: inline-flex; align-items: center; gap: 8px; padding: 9px 12px;
+      border-radius: 999px; background: rgba(15, 23, 42, 0.92);
+      border: 1px solid var(--border); color: var(--muted); font-size: 0.76rem; font-weight: 700; white-space: nowrap;
     }
-
     .pill strong { color: var(--text); }
     .pill.ok { color: #bbf7d0; border-color: rgba(34, 197, 94, 0.22); background: rgba(7, 43, 22, 0.8); }
     .pill.warn { color: #fde68a; border-color: rgba(245, 158, 11, 0.24); background: rgba(69, 38, 2, 0.74); }
     .pill.bad { color: #fecaca; border-color: rgba(239, 68, 68, 0.24); background: rgba(69, 10, 10, 0.74); }
-
-    .live-pill {
-      gap: 8px;
-    }
-
+    .live-pill { gap: 8px; }
     .live-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--green);
+      width: 7px; height: 7px; border-radius: 50%; background: var(--green);
       animation: livePulse 2.4s ease-in-out infinite;
     }
-
     @keyframes livePulse {
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.55; transform: scale(0.85); }
     }
 
     .refresh-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 12px;
-      border: 1px solid var(--border-soft);
-      background: var(--bg-panel-solid-2);
-      color: var(--text-secondary);
-      cursor: pointer;
-      display: grid;
-      place-items: center;
-      transition: all 160ms ease;
-      flex-shrink: 0;
+      width: 36px; height: 36px; border-radius: 12px; border: 1px solid var(--border-soft);
+      background: var(--bg-panel-solid-2); color: var(--text-secondary); cursor: pointer;
+      display: grid; place-items: center; transition: all 160ms ease; flex-shrink: 0;
     }
+    .refresh-btn:hover { color: var(--text-primary); border-color: var(--border-strong); background: var(--bg-panel-hover); }
+    .refresh-btn.spin svg { animation: spin 600ms linear; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-    .refresh-btn:hover {
-      color: var(--text-primary);
-      border-color: var(--border-strong);
-      background: var(--bg-panel-hover);
-    }
+    /* ── Hero Grid (KPIs) ── */
+    .hero-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-top: 16px; }
 
-    .refresh-btn.spin svg {
-      animation: spin 600ms linear;
-    }
-
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    .hero-grid {
-      display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      gap: 14px;
-      margin-top: 16px;
-    }
-
-    .hero-panel,
-    .kpi-card,
-    .panel-card,
-    .controls,
-    .server-card,
-    .empty-state {
+    .hero-panel, .kpi-card, .panel-card, .controls, .server-card, .empty-state {
       border-radius: var(--radius);
       background: linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(10, 16, 28, 0.96));
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
+      border: 1px solid var(--border); box-shadow: var(--shadow);
     }
 
-    .hero-panel {
-      padding: 18px;
-      position: relative;
-      overflow: hidden;
-    }
-
+    .hero-panel { padding: 18px; position: relative; overflow: hidden; }
     .hero-panel::after {
-      content: '';
-      position: absolute;
-      right: -45px;
-      bottom: -45px;
-      width: 180px;
-      height: 180px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(96, 165, 250, 0.18), transparent 72%);
+      content: ''; position: absolute; right: -45px; bottom: -45px; width: 180px; height: 180px;
+      border-radius: 50%; background: radial-gradient(circle, rgba(96, 165, 250, 0.18), transparent 72%);
       pointer-events: none;
     }
-
     .hero-kicker {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: rgba(96, 165, 250, 0.12);
-      color: #d8e9ff;
-      font-size: 0.72rem;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-bottom: 10px;
+      display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px;
+      border-radius: 999px; background: rgba(96, 165, 250, 0.12); color: #d8e9ff;
+      font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px;
     }
-
-    .hero-panel h3 {
-      margin: 0;
-      font-size: 1.32rem;
-      line-height: 1.14;
-      max-width: 17ch;
-    }
-
-    .hero-panel p {
-      margin: 10px 0 0;
-      color: var(--muted);
-      max-width: 58ch;
-      line-height: 1.58;
-    }
-
-    .hero-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 14px;
-    }
-
+    .hero-panel h3 { margin: 0; font-size: 1.32rem; line-height: 1.14; max-width: 17ch; }
+    .hero-panel p { margin: 10px 0 0; color: var(--muted); max-width: 58ch; line-height: 1.58; }
+    .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
     .hero-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      background: rgba(8, 13, 26, 0.86);
-      border: 1px solid rgba(148, 163, 184, 0.1);
-      color: var(--muted);
-      font-size: 0.74rem;
+      display: inline-flex; align-items: center; gap: 6px; padding: 8px 10px;
+      border-radius: 999px; background: rgba(8, 13, 26, 0.86);
+      border: 1px solid rgba(148, 163, 184, 0.1); color: var(--muted); font-size: 0.74rem;
     }
 
     .kpi-card {
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      min-height: 138px;
-      transition: transform 160ms ease, border-color 160ms ease;
+      padding: 16px; display: flex; flex-direction: column; justify-content: space-between;
+      min-height: 138px; transition: transform 160ms ease, border-color 160ms ease;
+      overflow: hidden;
     }
-
-    .kpi-card:hover {
-      transform: translateY(-2px);
-      border-color: var(--border-strong);
-    }
-
-    .kpi-top {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 6px;
-    }
-
+    .kpi-card:hover { transform: translateY(-2px); border-color: var(--border-strong); }
+    .kpi-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
     .kpi-icon {
-      display: grid;
-      place-items: center;
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
-      background: rgba(148, 163, 184, 0.08);
+      display: grid; place-items: center; width: 28px; height: 28px;
+      border-radius: 8px; background: rgba(148, 163, 184, 0.08); flex-shrink: 0;
     }
-
     .kpi-label {
-      color: var(--text-muted);
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-weight: 800;
+      color: var(--text-muted); font-size: 0.72rem; text-transform: uppercase;
+      letter-spacing: 0.08em; font-weight: 800;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-
     .kpi-value {
-      margin-top: 6px;
-      font-size: 1.8rem;
-      font-weight: 800;
-      line-height: 1;
+      margin-top: 6px; font-size: 1.8rem; font-weight: 800; line-height: 1;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-
     .kpi-foot {
-      margin-top: 8px;
-      color: var(--text-secondary);
-      font-size: 0.76rem;
-      line-height: 1.55;
+      margin-top: 8px; color: var(--text-secondary); font-size: 0.76rem; line-height: 1.55;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-
     .kpi-bar {
-      margin-top: 12px;
-      height: 6px;
-      border-radius: 999px;
-      background: rgba(148, 163, 184, 0.1);
-      overflow: hidden;
-      border: 1px solid rgba(148, 163, 184, 0.08);
+      margin-top: 12px; height: 6px; border-radius: 999px;
+      background: rgba(148, 163, 184, 0.1); overflow: hidden; border: 1px solid rgba(148, 163, 184, 0.08);
     }
+    .kpi-bar span { display: block; height: 100%; border-radius: inherit; transition: width 280ms ease; }
+    .kpi-spark { display: block; width: 100%; height: 36px !important; margin-top: 10px; }
 
-    .kpi-bar span {
-      display: block;
-      height: 100%;
-      border-radius: inherit;
-      transition: width 280ms ease;
-    }
-
-    .kpi-spark {
-      display: block;
-      width: 100%;
-      height: 36px !important;
-      margin-top: 10px;
-    }
-
-    .panel-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-      margin-top: 14px;
-    }
-
-    .panel-card {
-      padding: 14px;
-      min-width: 0;
-    }
-
-    .panel-head {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
+    /* ── Fleet Panels ── */
+    .panel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 14px; }
+    .panel-card { padding: 14px; min-width: 0; overflow: hidden; }
+    .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
     .panel-head h4 {
-      margin: 0;
-      font-size: 0.82rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted);
+      margin: 0; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-
     .panel-head strong {
-      display: block;
-      margin-top: 6px;
-      font-size: 1.1rem;
-      color: var(--text);
+      display: block; margin-top: 6px; font-size: 1.1rem; color: var(--text);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
+    .panel-head span { color: var(--muted); font-size: 0.74rem; white-space: nowrap; }
+    .panel-card canvas { display: block; width: 100%; height: 240px !important; }
 
-    .panel-head span {
-      color: var(--muted);
-      font-size: 0.74rem;
-    }
-
-    .panel-card canvas {
-      display: block;
-      width: 100%;
-      height: 240px !important;
-    }
-
-    .controls {
-      margin-top: 14px;
-      padding: 14px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .searchbox {
-      position: relative;
-      flex: 1 1 280px;
-      min-width: 220px;
-    }
-
-    .searchbox svg {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 16px;
-      height: 16px;
-      color: var(--muted);
-    }
-
+    /* ── Controls ── */
+    .controls { margin-top: 14px; padding: 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .searchbox { position: relative; flex: 1 1 280px; min-width: 220px; }
+    .searchbox svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--muted); }
     .searchbox input {
-      width: 100%;
-      height: 42px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: var(--panel-3);
-      color: var(--text);
-      padding: 0 14px 0 42px;
-      outline: none;
+      width: 100%; height: 42px; border-radius: 14px; border: 1px solid var(--border);
+      background: var(--panel-3); color: var(--text); padding: 0 14px 0 42px; outline: none;
     }
-
-    .searchbox input:focus {
-      border-color: rgba(96, 165, 250, 0.35);
-      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.12);
-    }
-
-    .filter-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .filter-label {
-      color: var(--muted);
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-weight: 800;
-    }
-
+    .searchbox input:focus { border-color: rgba(96, 165, 250, 0.35); box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.12); }
+    .searchbox input::placeholder { color: var(--text-muted); }
+    .filter-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .filter-label { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 800; white-space: nowrap; }
     .filter-pill {
-      padding: 9px 12px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: var(--panel-3);
-      color: var(--muted);
-      font-size: 0.78rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.18s ease;
+      padding: 9px 12px; border-radius: 999px; border: 1px solid var(--border);
+      background: var(--panel-3); color: var(--muted); font-size: 0.78rem; font-weight: 700;
+      cursor: pointer; transition: all 0.18s ease; white-space: nowrap;
     }
+    .filter-pill.active, .filter-pill:hover { color: var(--text); border-color: rgba(96, 165, 250, 0.24); background: rgba(17, 39, 87, 0.42); }
+    .controls-note { margin-left: auto; color: var(--text-muted); font-size: 0.76rem; white-space: nowrap; }
+    .sort-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
-    .filter-pill.active,
-    .filter-pill:hover {
-      color: var(--text);
-      border-color: rgba(96, 165, 250, 0.24);
-      background: rgba(17, 39, 87, 0.42);
-    }
+    /* ── Workspace Views ── */
+    .workspace-view { display: block; }
+    .workspace-view.hidden { display: none !important; }
 
-    .controls-note {
-      margin-left: auto;
-      color: var(--text-muted);
-      font-size: 0.76rem;
-    }
-
-    .sort-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    #server-grid {
-      margin-top: 14px;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 14px;
-      align-items: start;
-    }
-
+    /* ── Server Grid ── */
+    #server-grid { margin-top: 14px; display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; align-items: start; }
     .hidden { display: none !important; }
+    .no-data { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; height: 240px; color: var(--text-muted); font-size: 0.82rem; text-align: center; }
+    .no-data strong { color: var(--text-secondary); font-size: 0.92rem; }
+    .no-data.hidden { display: none !important; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn 380ms ease forwards; }
+    .empty-state { grid-column: 1 / -1; padding: 56px 24px; text-align: center; color: var(--muted); line-height: 1.7; }
+    .empty-state strong { display: block; color: var(--text); font-size: 1.05rem; margin-bottom: 8px; }
 
-    .no-data {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      height: 240px;
-      color: var(--text-muted);
-      font-size: 0.82rem;
-      text-align: center;
-    }
-
-    .no-data strong {
-      color: var(--text-secondary);
-      font-size: 0.92rem;
-    }
-
-    .no-data.hidden {
-      display: none !important;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .fade-in {
-      animation: fadeIn 380ms ease forwards;
-    }
-
-    .empty-state {
-      grid-column: 1 / -1;
-      padding: 56px 24px;
-      text-align: center;
-      color: var(--muted);
-      line-height: 1.7;
-    }
-
-    .empty-state strong {
-      display: block;
-      color: var(--text);
-      font-size: 1.05rem;
-      margin-bottom: 8px;
-    }
-
-    .server-card {
-      overflow: hidden;
-      transition: transform 0.18s ease, border-color 0.18s ease;
-    }
-
-    .server-card:hover {
-      transform: translateY(-2px);
-      border-color: rgba(96, 165, 250, 0.18);
-    }
-
+    /* ── Server Card ── */
+    .server-card { overflow: hidden; transition: transform 0.18s ease, border-color 0.18s ease; }
+    .server-card:hover { transform: translateY(-2px); border-color: rgba(96, 165, 250, 0.18); }
     .server-card.offline { opacity: 0.72; }
     .server-card.warning { border-color: rgba(245, 158, 11, 0.32); }
     .server-card.critical { border-color: rgba(239, 68, 68, 0.34); }
-
     .card-body { padding: 16px; }
-
-    .card-header {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-
+    .card-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
     .card-avatar {
-      width: 42px;
-      height: 42px;
-      border-radius: 14px;
-      display: grid;
-      place-items: center;
-      color: #d9ebff;
+      width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; color: #d9ebff;
       background: linear-gradient(135deg, rgba(59, 130, 246, 0.18), rgba(34, 211, 238, 0.16));
-      border: 1px solid rgba(96, 165, 250, 0.18);
-      flex-shrink: 0;
+      border: 1px solid rgba(96, 165, 250, 0.18); flex-shrink: 0;
     }
-
-    .card-title {
-      min-width: 0;
-      flex: 1;
-    }
-
-    .card-title h3 {
-      margin: 0;
-      font-size: 1rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .card-subtitle {
-      margin-top: 4px;
-      color: var(--muted);
-      font-size: 0.78rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .badge-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 8px;
-    }
-
+    .card-title { min-width: 0; flex: 1; overflow: hidden; }
+    .card-title h3 { margin: 0; font-size: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .card-subtitle { margin-top: 4px; color: var(--muted); font-size: 0.78rem; display: flex; flex-wrap: wrap; gap: 8px; }
+    .card-subtitle span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
     .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 5px 9px;
-      border-radius: 999px;
-      font-size: 0.7rem;
-      font-weight: 800;
-      border: 1px solid rgba(148, 163, 184, 0.12);
-      background: rgba(8, 13, 26, 0.82);
-      color: var(--muted);
-      white-space: nowrap;
+      display: inline-flex; align-items: center; gap: 6px; padding: 5px 9px; border-radius: 999px;
+      font-size: 0.7rem; font-weight: 800; border: 1px solid rgba(148, 163, 184, 0.12);
+      background: rgba(8, 13, 26, 0.82); color: var(--muted); white-space: nowrap;
     }
-
     .badge.online { color: #bbf7d0; border-color: rgba(34, 197, 94, 0.22); background: rgba(7, 43, 22, 0.78); }
     .badge.offline { color: #cbd5e1; }
     .badge.warning { color: #fde68a; border-color: rgba(245, 158, 11, 0.24); background: rgba(69, 38, 2, 0.74); }
     .badge.critical { color: #fecaca; border-color: rgba(239, 68, 68, 0.24); background: rgba(69, 10, 10, 0.74); }
     .badge.info { color: #d7e7ff; border-color: rgba(96, 165, 250, 0.2); background: rgba(17, 39, 87, 0.36); }
-
     .expand-btn {
-      width: 34px;
-      height: 34px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: var(--panel-3);
-      color: var(--muted);
-      cursor: pointer;
-      transition: transform 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-      flex-shrink: 0;
+      width: 34px; height: 34px; border-radius: 12px; border: 1px solid var(--border);
+      background: var(--panel-3); color: var(--muted); cursor: pointer;
+      transition: transform 0.2s ease, color 0.2s ease, border-color 0.2s ease; flex-shrink: 0;
     }
+    .expand-btn.open, .expand-btn:hover { color: var(--text); border-color: rgba(96, 165, 250, 0.24); transform: rotate(180deg); }
 
-    .expand-btn.open,
-    .expand-btn:hover {
-      color: var(--text);
-      border-color: rgba(96, 165, 250, 0.24);
-      transform: rotate(180deg);
-    }
-
-    .metric-rows {
-      display: grid;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
+    .metric-rows { display: grid; gap: 8px; margin-bottom: 12px; }
     .metric-row {
-      display: grid;
-      grid-template-columns: 50px 60px 1fr auto;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 10px;
-      border-radius: 12px;
-      background: rgba(8, 13, 26, 0.5);
-      border: 1px solid rgba(148, 163, 184, 0.06);
-      min-width: 0;
+      display: grid; grid-template-columns: 50px 60px 1fr auto; align-items: center; gap: 10px;
+      padding: 8px 10px; border-radius: 12px; background: rgba(8, 13, 26, 0.5);
+      border: 1px solid rgba(148, 163, 184, 0.06); min-width: 0;
     }
-
     .metric-row .metric-label {
-      color: var(--text-muted);
-      font-size: 0.72rem;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      color: var(--text-muted); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em;
+      text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
+    .metric-row .metric-value { font-size: 1rem; font-weight: 800; text-align: right; white-space: nowrap; }
+    .metric-row .metric-bar { height: 6px; border-radius: 999px; background: rgba(148, 163, 184, 0.1); overflow: hidden; }
+    .metric-row .metric-bar span { display: block; height: 100%; border-radius: inherit; transition: width 280ms ease; }
+    .metric-row .metric-extra { color: var(--text-secondary); font-size: 0.76rem; text-align: right; white-space: nowrap; }
 
-    .metric-row .metric-value {
-      font-size: 1rem;
-      font-weight: 800;
-      text-align: right;
-    }
-
-    .metric-row .metric-bar {
-      height: 6px;
-      border-radius: 999px;
-      background: rgba(148, 163, 184, 0.1);
-      overflow: hidden;
-    }
-
-    .metric-row .metric-bar span {
-      display: block;
-      height: 100%;
-      border-radius: inherit;
-      transition: width 280ms ease;
-    }
-
-    .metric-row .metric-extra {
-      color: var(--text-secondary);
-      font-size: 0.76rem;
-      text-align: right;
-      white-space: nowrap;
-    }
-
-    .fan-chip-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
+    .fan-chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
     .fan-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 10px;
-      border-radius: 12px;
-      background: rgba(8, 13, 26, 0.8);
-      border: 1px solid rgba(148, 163, 184, 0.08);
-      min-width: 0;
+      display: inline-flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px;
+      background: rgba(8, 13, 26, 0.8); border: 1px solid rgba(148, 163, 184, 0.08); min-width: 0;
     }
-
-    .fan-chip-copy {
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-    }
-
+    .fan-chip-copy { display: flex; flex-direction: column; min-width: 0; }
     .fan-chip-copy span:first-child {
-      color: var(--muted);
-      font-size: 0.68rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-weight: 800;
+      color: var(--muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 800;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-
     .fan-chip-copy span:last-child {
-      color: var(--text);
-      font-size: 0.74rem;
+      color: var(--text); font-size: 0.74rem;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
+    .fan-chip strong { font-size: 0.82rem; white-space: nowrap; }
 
-    .fan-chip strong {
-      font-size: 0.82rem;
-      white-space: nowrap;
-    }
-
-    .spark-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-
-    .spark-card {
-      padding: 10px;
-      border-radius: 12px;
-      background: rgba(8, 13, 26, 0.78);
-      border: 1px solid rgba(148, 163, 184, 0.08);
-      min-width: 0;
-    }
-
+    .spark-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 8px; margin-bottom: 10px; }
+    .spark-card { padding: 10px; border-radius: 12px; background: rgba(8, 13, 26, 0.78); border: 1px solid rgba(148, 163, 184, 0.08); min-width: 0; }
     .spark-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      color: var(--text-muted);
-      font-size: 0.66rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 8px;
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      color: var(--text-muted); font-size: 0.66rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;
     }
+    .spark-head strong { color: var(--text-primary); font-size: 0.72rem; text-transform: none; letter-spacing: 0; }
+    .spark-card canvas { display: block; width: 100%; height: 32px; }
 
-    .spark-head strong {
-      color: var(--text-primary);
-      font-size: 0.72rem;
-      text-transform: none;
-      letter-spacing: 0;
-    }
-
-    .spark-card canvas {
-      display: block;
-      width: 100%;
-      height: 32px;
-    }
-
-    .card-foot {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      color: var(--muted);
-      font-size: 0.74rem;
-    }
-
+    .card-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 0.74rem; overflow: hidden; }
     .card-foot strong { color: var(--text); }
+    .card-foot span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-    .card-expand {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.38s ease;
-      border-top: 0 solid rgba(148, 163, 184, 0.08);
-    }
-
-    .card-expand.open {
-      max-height: 2600px;
-      border-top-width: 1px;
-    }
-
-    .expand-inner {
-      padding: 16px;
-      background: rgba(7, 12, 24, 0.72);
-    }
-
-    .expand-summary {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-
-    .summary-tile {
-      padding: 12px;
-      border-radius: 14px;
-      background: rgba(8, 13, 26, 0.8);
-      border: 1px solid rgba(148, 163, 184, 0.08);
-    }
-
+    .card-expand { max-height: 0; overflow: hidden; transition: max-height 0.38s ease; border-top: 0 solid rgba(148, 163, 184, 0.08); }
+    .card-expand.open { max-height: 2600px; border-top-width: 1px; }
+    .expand-inner { padding: 16px; background: rgba(7, 12, 24, 0.72); }
+    .expand-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 12px; }
+    .summary-tile { padding: 12px; border-radius: 14px; background: rgba(8, 13, 26, 0.8); border: 1px solid rgba(148, 163, 184, 0.08); overflow: hidden; }
     .summary-tile .label {
-      color: var(--muted);
-      font-size: 0.68rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
+      color: var(--muted); font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-
     .summary-tile .value {
-      margin-top: 6px;
-      font-size: 1rem;
-      font-weight: 800;
+      margin-top: 6px; font-size: 1rem; font-weight: 800;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
 
-    .detail-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .detail-card {
-      padding: 14px;
-      border-radius: 16px;
-      background: rgba(10, 16, 28, 0.86);
-      border: 1px solid rgba(148, 163, 184, 0.08);
-      min-width: 0;
-    }
-
+    .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+    .detail-card { padding: 14px; border-radius: 16px; background: rgba(10, 16, 28, 0.86); border: 1px solid rgba(148, 163, 184, 0.08); min-width: 0; overflow: hidden; }
     .detail-title {
-      margin: 0 0 10px;
-      color: var(--muted);
-      font-size: 0.72rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
+      margin: 0 0 10px; color: var(--muted); font-size: 0.72rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-
-    .detail-card canvas {
-      display: block;
-      width: 100%;
-      height: 170px !important;
-    }
-
+    .detail-card canvas { display: block; width: 100%; height: 170px !important; }
     .detail-caption {
-      margin-top: 6px;
-      color: var(--muted);
-      font-size: 0.74rem;
-      line-height: 1.45;
+      margin-top: 6px; color: var(--muted); font-size: 0.74rem; line-height: 1.45;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
 
-    .sensor-panels {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-      margin-top: 12px;
-    }
-
-    .sensor-panel {
-      padding: 14px;
-      border-radius: 16px;
-      background: rgba(10, 16, 28, 0.86);
-      border: 1px solid rgba(148, 163, 184, 0.08);
-    }
-
-    .sensor-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 8px;
-    }
-
+    .sensor-panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 12px; }
+    .sensor-panel { padding: 14px; border-radius: 16px; background: rgba(10, 16, 28, 0.86); border: 1px solid rgba(148, 163, 184, 0.08); overflow: hidden; }
+    .sensor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
     .sensor-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 10px 11px;
-      border-radius: 12px;
-      background: rgba(8, 13, 26, 0.8);
-      border: 1px solid rgba(148, 163, 184, 0.08);
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 10px 11px; border-radius: 12px; background: rgba(8, 13, 26, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.08); overflow: hidden;
     }
-
     .sensor-item .name {
-      min-width: 0;
-      color: var(--muted);
-      font-size: 0.76rem;
-      line-height: 1.4;
+      min-width: 0; color: var(--muted); font-size: 0.76rem; line-height: 1.4;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-
-    .sensor-item .value {
-      white-space: nowrap;
-      font-size: 0.84rem;
-      font-weight: 800;
-    }
+    .sensor-item .value { white-space: nowrap; font-size: 0.84rem; font-weight: 800; flex-shrink: 0; }
 
     .green { color: var(--green) !important; }
     .yellow { color: var(--yellow) !important; }
     .red { color: var(--red) !important; }
     .blue { color: var(--blue) !important; }
 
+    /* ── Server Detail View (full workspace) ── */
+    .detail-view {
+      margin-top: 0;
+    }
+
+    .detail-nav {
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+      padding: 14px 16px; margin-bottom: 16px;
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(10, 16, 28, 0.96));
+      border: 1px solid var(--border); box-shadow: var(--shadow);
+    }
+
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 16px; border-radius: 12px;
+      border: 1px solid var(--border-soft);
+      background: rgba(8, 13, 26, 0.7); color: var(--text-secondary);
+      cursor: pointer; font-size: 0.8rem; font-weight: 700;
+      transition: all 160ms ease; flex-shrink: 0;
+    }
+    .back-btn:hover { color: var(--text-primary); border-color: var(--border-strong); background: var(--bg-panel-hover); }
+
+    .detail-nav-info { flex: 1; min-width: 0; overflow: hidden; }
+    .detail-nav-info h2 {
+      margin: 0; font-size: 1.2rem;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .detail-nav-info p {
+      margin: 4px 0 0; color: var(--muted); font-size: 0.78rem;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .detail-nav-pills { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex-shrink: 0; }
+
+    /* Detail KPI cards */
+    .detail-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px; margin-bottom: 16px;
+    }
+    .detail-kpi-card {
+      padding: 14px; border-radius: 14px; overflow: hidden;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(10, 16, 28, 0.96));
+      border: 1px solid var(--border); box-shadow: var(--shadow);
+    }
+    .detail-kpi-card .dkpi-label {
+      color: var(--text-muted); font-size: 0.68rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.08em; margin-bottom: 4px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .detail-kpi-card .dkpi-value { font-size: 1.6rem; font-weight: 800; line-height: 1.2; white-space: nowrap; }
+    .detail-kpi-card .dkpi-sub {
+      margin-top: 4px; color: var(--text-secondary); font-size: 0.72rem;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .dkpi-bar {
+      margin-top: 10px; height: 4px; border-radius: 999px;
+      background: rgba(148, 163, 184, 0.1); overflow: hidden;
+    }
+    .dkpi-bar span { display: block; height: 100%; border-radius: inherit; transition: width 280ms ease; }
+
+    /* Detail charts */
+    .detail-chart-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 14px; margin-bottom: 16px;
+    }
+    .detail-chart-card {
+      padding: 14px; border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(10, 16, 28, 0.96));
+      border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden;
+    }
+    .detail-chart-card h4 {
+      margin: 0 0 10px; color: var(--muted); font-size: 0.72rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .detail-chart-card canvas { display: block; width: 100%; height: 200px !important; }
+
+    .detail-sensor-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 14px; margin-bottom: 16px;
+    }
+    .detail-sensor-card {
+      padding: 16px; border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(10, 16, 28, 0.96));
+      border: 1px solid var(--border); box-shadow: var(--shadow);
+    }
+    .detail-sensor-card h4 {
+      margin: 0 0 12px; color: var(--muted); font-size: 0.72rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    .detail-sensor-grid-inner { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; }
+    .detail-sensor-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 10px; border-radius: 10px;
+      background: rgba(8, 13, 26, 0.6); border: 1px solid rgba(148, 163, 184, 0.06);
+      overflow: hidden;
+    }
+    .detail-sensor-item .sn {
+      min-width: 0; color: var(--muted); font-size: 0.72rem;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .detail-sensor-item .sv { white-space: nowrap; font-size: 0.82rem; font-weight: 700; flex-shrink: 0; }
+
+    .detail-spark-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px; margin-bottom: 16px;
+    }
+    .detail-spark-card {
+      padding: 12px; border-radius: 14px;
+      background: rgba(10, 16, 28, 0.86); border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .detail-spark-card .shead {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      color: var(--text-muted); font-size: 0.66rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;
+    }
+    .detail-spark-card .shead strong { color: var(--text-primary); font-size: 0.8rem; text-transform: none; letter-spacing: 0; }
+    .detail-spark-card canvas { display: block; width: 100%; height: 36px; }
+
+    .workspace-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(360px, 520px);
+      gap: 16px;
+      margin-top: 16px;
+      align-items: start;
+    }
+
+    #grid-view {
+      display: grid;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    #detail-view {
+      display: block;
+      min-width: 0;
+    }
+
+    .detail-view-panel {
+      position: sticky;
+      top: 82px;
+      display: grid;
+      gap: 14px;
+      max-height: calc(100vh - 104px);
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .detail-view-panel::-webkit-scrollbar { width: 6px; }
+    .detail-view-panel::-webkit-scrollbar-track { background: transparent; }
+    .detail-view-panel::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.2); border-radius: 999px; }
+
+    .detail-empty {
+      display: grid;
+      gap: 12px;
+      padding: 22px;
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(10, 16, 28, 0.96));
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .detail-empty-mark {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      color: #dcecff;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.22), rgba(244, 63, 94, 0.12));
+      border: 1px solid rgba(96, 165, 250, 0.18);
+    }
+
+    .detail-empty strong {
+      font-size: 1.08rem;
+      letter-spacing: 0.01em;
+    }
+
+    .detail-empty p {
+      color: var(--text-secondary);
+      line-height: 1.65;
+      max-width: 46ch;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      line-clamp: 3;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+    }
+
+    .detail-content {
+      display: grid;
+      gap: 14px;
+    }
+
+    .overview-banner {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.9fr);
+      gap: 14px;
+      padding: 18px;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(10, 16, 28, 0.96));
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .overview-banner::after {
+      content: '';
+      position: absolute;
+      inset: auto -40px -56px auto;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.16), transparent 70%);
+      pointer-events: none;
+    }
+
+    .overview-copy {
+      position: relative;
+      z-index: 1;
+      min-width: 0;
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .overview-copy h3 {
+      font-size: 1.45rem;
+      line-height: 1.15;
+      max-width: 18ch;
+    }
+
+    .overview-copy p {
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 60ch;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      line-clamp: 3;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+    }
+
+    .overview-stats {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .overview-stat {
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(8, 13, 26, 0.74);
+      border: 1px solid rgba(148, 163, 184, 0.08);
+      display: grid;
+      gap: 4px;
+      overflow: hidden;
+    }
+
+    .overview-stat span {
+      color: var(--text-muted);
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .overview-stat strong {
+      font-size: 0.96rem;
+      color: var(--text-primary);
+      line-height: 1.4;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .hero-grid {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 0;
+    }
+
+    .kpi-card {
+      min-height: 118px;
+      padding: 14px;
+    }
+
+    .kpi-value {
+      font-size: 1.5rem;
+    }
+
+    .kpi-foot {
+      white-space: normal;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      line-clamp: 2;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      min-height: 2.4em;
+    }
+
+    .panel-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 0;
+    }
+
+    .panel-card canvas {
+      height: 176px !important;
+    }
+
+    .panel-head span,
+    .detail-caption,
+    .dkpi-sub {
+      white-space: normal;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      line-clamp: 2;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      min-width: 0;
+      padding: 0 2px;
+    }
+
+    .section-copy {
+      min-width: 0;
+      display: grid;
+      gap: 4px;
+    }
+
+    .section-copy h3 {
+      font-size: 0.96rem;
+      letter-spacing: 0.01em;
+    }
+
+    .section-copy p {
+      color: var(--text-secondary);
+      line-height: 1.55;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      line-clamp: 2;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .section-count {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 11px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      background: rgba(8, 13, 26, 0.68);
+      color: var(--text-secondary);
+      font-size: 0.74rem;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    #server-grid {
+      margin-top: 0;
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(250px, 280px);
+      gap: 12px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      align-items: stretch;
+      padding-bottom: 6px;
+    }
+
+    #server-grid::-webkit-scrollbar { height: 6px; }
+    #server-grid::-webkit-scrollbar-track { background: transparent; }
+    #server-grid::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.2); border-radius: 999px; }
+
+    .server-card {
+      cursor: pointer;
+      min-width: 0;
+    }
+
+    .server-card.active {
+      border-color: rgba(96, 165, 250, 0.34);
+      box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.18), var(--shadow);
+    }
+
+    .card-body {
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .card-header {
+      margin-bottom: 0;
+      align-items: center;
+    }
+
+    .card-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+    }
+
+    .card-title h3 {
+      font-size: 0.94rem;
+    }
+
+    .card-subtitle {
+      gap: 6px;
+      line-height: 1.35;
+    }
+
+    .card-subtitle span {
+      max-width: 100%;
+    }
+
+    .snapshot-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .snapshot-stat {
+      padding: 9px 10px;
+      border-radius: 12px;
+      background: rgba(8, 13, 26, 0.74);
+      border: 1px solid rgba(148, 163, 184, 0.08);
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .snapshot-stat-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .snapshot-stat-label {
+      color: var(--text-muted);
+      font-size: 0.64rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .snapshot-stat-value {
+      font-size: 0.96rem;
+      font-weight: 800;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .snapshot-stat-sub {
+      color: var(--text-secondary);
+      font-size: 0.72rem;
+      line-height: 1.45;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      line-clamp: 2;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      min-height: 2.9em;
+    }
+
+    .mini-bar {
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.1);
+      overflow: hidden;
+    }
+
+    .mini-bar span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      transition: width 280ms ease;
+    }
+
+    .snapshot-thermal {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(10, 16, 28, 0.86);
+      border: 1px solid rgba(148, 163, 184, 0.08);
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .snapshot-thermal svg {
+      flex-shrink: 0;
+      color: var(--metric-temp);
+    }
+
+    .snapshot-thermal-copy {
+      min-width: 0;
+      display: grid;
+      gap: 3px;
+      flex: 1;
+    }
+
+    .snapshot-thermal-copy span {
+      color: var(--text-muted);
+      font-size: 0.66rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .snapshot-thermal-copy strong {
+      font-size: 0.82rem;
+      line-height: 1.45;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .snapshot-spark-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .snapshot-spark {
+      padding: 10px;
+      border-radius: 12px;
+      background: rgba(8, 13, 26, 0.78);
+      border: 1px solid rgba(148, 163, 184, 0.08);
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .snapshot-spark-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+      color: var(--text-muted);
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      min-width: 0;
+    }
+
+    .snapshot-spark-head span,
+    .snapshot-spark-head strong {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .snapshot-spark-head strong {
+      color: var(--text-primary);
+      font-size: 0.74rem;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .snapshot-spark canvas {
+      display: block;
+      width: 100%;
+      height: 28px;
+    }
+
+    .card-foot {
+      margin-top: 0;
+    }
+
+    .card-expand,
+    .expand-btn,
+    .metric-rows,
+    .fan-chip-row,
+    .spark-grid {
+      display: none !important;
+    }
+
+    .detail-nav {
+      margin-bottom: 0;
+    }
+
+    .detail-nav-info p {
+      white-space: normal;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      line-clamp: 2;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .detail-kpi-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .detail-chart-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .detail-chart-card canvas {
+      height: 186px !important;
+    }
+
+    .detail-sensor-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .detail-sensor-card,
+    .detail-chart-card,
+    .detail-kpi-card {
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .detail-sensor-item .sn,
+    .detail-sensor-item .sv,
+    .detail-nav-pills .pill,
+    .snapshot-thermal .badge {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── Responsive ── */
     @media (max-width: 1340px) {
       .hero-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .panel-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
-
     @media (max-width: 1120px) {
-      .app-shell { grid-template-columns: 1fr; }
-      .sidebar { position: relative; height: auto; border-right: 0; border-bottom: 1px solid var(--border); }
+      .app-shell { grid-template-columns: 260px 1fr; }
+      .workspace-shell { grid-template-columns: 1fr; }
+      .detail-view-panel {
+        position: static;
+        max-height: none;
+        overflow: visible;
+        padding-right: 0;
+      }
     }
-
     @media (max-width: 900px) {
+      .app-shell { grid-template-columns: 1fr; }
+      .sidebar { position: relative; height: auto; max-height: 60vh; border-right: 0; border-bottom: 1px solid var(--border); }
       .hero-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .panel-grid,
-      .detail-grid,
-      .sensor-panels,
-      .spark-grid,
-      .metric-rows { grid-template-columns: 1fr; }
+      .panel-grid, .detail-grid, .sensor-panels, .spark-grid, .metric-rows { grid-template-columns: 1fr; }
       .controls-note { width: 100%; margin-left: 0; }
+      .overview-banner { grid-template-columns: 1fr; }
+      .detail-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .detail-chart-grid { grid-template-columns: 1fr; }
+      #server-grid { grid-auto-columns: minmax(230px, 88vw); }
     }
-
     @media (max-width: 600px) {
       .workspace { padding: 10px; }
       .sidebar { padding: 10px; }
       .topbar { top: 6px; flex-wrap: wrap; }
       #server-grid { grid-template-columns: 1fr; }
       .hero-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .detail-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .detail-chart-grid { grid-template-columns: 1fr; }
+      .detail-sensor-grid { grid-template-columns: 1fr; }
+      .snapshot-strip,
+      .snapshot-spark-row,
+      .hero-grid,
+      .detail-kpi-grid { grid-template-columns: 1fr; }
+      .section-head { flex-direction: column; }
     }
   </style>
 </head>
 <body>
   <div class="app-shell">
     <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-mark">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22">
-            <rect x="3" y="4" width="18" height="12" rx="3"></rect>
-            <path d="M8 20h8"></path>
-            <path d="M12 16v4"></path>
-            <circle cx="12" cy="10" r="1.8" fill="currentColor" stroke="none"></circle>
-          </svg>
-        </div>
-        <div class="brand-copy">
-          <h1>Server Monitor</h1>
-          <p>Infra board inspiré des plateformes d’observabilité.</p>
+      <div class="sidebar-header">
+        <div class="brand">
+          <div class="brand-mark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22">
+              <rect x="3" y="4" width="18" height="12" rx="3"></rect>
+              <path d="M8 20h8"></path>
+              <path d="M12 16v4"></path>
+              <circle cx="12" cy="10" r="1.8" fill="currentColor" stroke="none"></circle>
+            </svg>
+          </div>
+          <div class="brand-copy">
+            <h1>Server Monitor</h1>
+            <p>Infrastructure observability</p>
+          </div>
         </div>
       </div>
 
@@ -1107,15 +1211,11 @@
         </div>
       </section>
 
-      <section class="side-section">
-        <h3 class="side-title">Navigation</h3>
-        <ul class="side-nav">
-          <li><a class="active" href="#hero-grid"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg> Overview</a></li>
-          <li><a href="#server-grid"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg> Hosts</a></li>
-          <li><a href="#fleet-panels"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20v-6m0 0V4m0 6h6m-6 0H6"/></svg> Metrics</a></li>
-          <li><a href="#server-grid" data-nav-filter="alert"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Alerts</a></li>
-          <li><a href="#controls"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 5 15.4a1.65 1.65 0 0 0-1.51 1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings</a></li>
-        </ul>
+      <section class="server-list-section">
+        <h3 class="side-title">Connected Servers</h3>
+        <div class="server-list" id="server-list">
+          <div class="server-list-empty">No servers connected yet</div>
+        </div>
       </section>
 
       <div class="side-footer">
@@ -1125,10 +1225,11 @@
     </aside>
 
     <main class="workspace">
+      <!-- ── Topbar ── -->
       <header class="topbar">
         <div class="topbar-copy">
-          <h2>Observability Dashboard</h2>
-          <p>Real-time infrastructure health across all monitored hosts</p>
+          <h2 id="topbar-title">Observability Dashboard</h2>
+          <p id="topbar-subtitle">Real-time infrastructure health across all monitored hosts</p>
         </div>
         <div class="topbar-spacer"></div>
         <span class="pill" id="server-count"><strong>0/0</strong> hosts</span>
@@ -1137,153 +1238,189 @@
         <button class="refresh-btn" id="refresh-btn" type="button" title="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
       </header>
 
-      <section class="hero-grid" id="hero-grid">
-        <article class="kpi-card">
-          <div class="kpi-top">
-            <div class="kpi-icon" style="color:var(--blue)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg></div>
-            <div class="kpi-label">Hosts online</div>
-          </div>
-          <div class="kpi-value" id="kpi-online">0 / 0</div>
-          <div class="kpi-foot" id="kpi-online-foot">No servers detected.</div>
-          <div class="kpi-bar"><span id="kpi-online-bar" style="width:0%;background:var(--blue)"></span></div>
-        </article>
+      <div class="workspace-shell">
 
-        <article class="kpi-card">
-          <div class="kpi-top">
-            <div class="kpi-icon" style="color:var(--metric-cpu)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M20 15h2"/></svg></div>
-            <div class="kpi-label">Avg CPU</div>
+      <!-- ── Workspace: Grid View ── -->
+      <div class="workspace-view" id="grid-view">
+        <section class="overview-banner">
+          <div class="overview-copy">
+            <span class="hero-kicker">Mission Control</span>
+            <h3>Cut through the noise and stay inside the signal.</h3>
+            <p id="overview-caption">Use the left rail to jump between hosts, keep the fleet pulse in view, and inspect full telemetry on the right without losing the operational overview.</p>
           </div>
-          <div class="kpi-value" id="kpi-cpu" style="color:var(--metric-cpu)">0%</div>
-          <div class="kpi-foot" id="kpi-cpu-foot">Avg across 0 hosts</div>
-          <div class="kpi-bar"><span id="kpi-cpu-bar" style="width:0%;background:var(--metric-cpu)"></span></div>
-          <canvas id="kpi-cpu-spark" class="kpi-spark"></canvas>
-        </article>
-
-        <article class="kpi-card">
-          <div class="kpi-top">
-            <div class="kpi-icon" style="color:var(--metric-ram)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
-            <div class="kpi-label">Avg RAM</div>
+          <div class="overview-stats">
+            <div class="overview-stat"><span>Focus host</span><strong id="overview-focus">No server selected</strong></div>
+            <div class="overview-stat"><span>Thermal watch</span><strong id="overview-thermal">No temperature data yet</strong></div>
+            <div class="overview-stat"><span>Fleet pressure</span><strong id="overview-load">Waiting for telemetry</strong></div>
           </div>
-          <div class="kpi-value" id="kpi-ram" style="color:var(--metric-ram)">0%</div>
-          <div class="kpi-foot" id="kpi-ram-foot">Memory pressure across fleet</div>
-          <div class="kpi-bar"><span id="kpi-ram-bar" style="width:0%;background:var(--metric-ram)"></span></div>
-          <canvas id="kpi-ram-spark" class="kpi-spark"></canvas>
-        </article>
+        </section>
 
-        <article class="kpi-card">
-          <div class="kpi-top">
-            <div class="kpi-icon" style="color:var(--metric-temp)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg></div>
-            <div class="kpi-label">Highest temp</div>
-          </div>
-          <div class="kpi-value" id="kpi-temp" style="color:var(--metric-temp)">—</div>
-          <div class="kpi-foot" id="kpi-temp-foot">Hottest sensor across fleet</div>
-          <canvas id="kpi-temp-spark" class="kpi-spark"></canvas>
-        </article>
-
-        <article class="kpi-card">
-          <div class="kpi-top">
-            <div class="kpi-icon" style="color:var(--metric-gpu)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="4" y="4" width="16" height="10" rx="2"/><path d="M9 14v4"/><path d="M15 14v4"/><path d="M12 18v2"/></svg></div>
-            <div class="kpi-label">GPU / VRAM</div>
-          </div>
-          <div class="kpi-value" id="kpi-gpu" style="color:var(--metric-gpu)">—</div>
-          <div class="kpi-foot" id="kpi-gpu-foot">No GPU data available</div>
-          <canvas id="kpi-gpu-spark" class="kpi-spark"></canvas>
-        </article>
-
-        <article class="kpi-card">
-          <div class="kpi-top">
-            <div class="kpi-icon" style="color:var(--yellow)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-            <div class="kpi-label">Alerts</div>
-          </div>
-          <div class="kpi-value" id="kpi-alerts" style="color:var(--yellow)">0</div>
-          <div class="kpi-foot" id="kpi-alerts-foot">All systems healthy</div>
-          <div class="kpi-bar"><span id="kpi-alerts-bar" style="width:0%;background:var(--yellow)"></span></div>
-        </article>
-      </section>
-
-      <section class="panel-grid" id="fleet-panels">
-        <article class="panel-card">
-          <div class="panel-head">
-            <div>
-              <h4>Fleet CPU history</h4>
-              <strong id="fleet-cpu-current">0%</strong>
+        <section class="hero-grid" id="hero-grid">
+          <article class="kpi-card">
+            <div class="kpi-top">
+              <div class="kpi-icon" style="color:var(--blue)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg></div>
+              <div class="kpi-label">Hosts online</div>
             </div>
-            <span>Avg across hosts</span>
-          </div>
-          <div class="no-data" id="no-data-cpu">
-            <strong>No data available yet</strong>
-            <span>Waiting for next polling cycle</span>
-          </div>
-          <canvas id="fleet-cpu-chart"></canvas>
-        </article>
-
-        <article class="panel-card">
-          <div class="panel-head">
-            <div>
-              <h4>Fleet RAM history</h4>
-              <strong id="fleet-ram-current">0%</strong>
+            <div class="kpi-value" id="kpi-online">0 / 0</div>
+            <div class="kpi-foot" id="kpi-online-foot">No servers detected.</div>
+            <div class="kpi-bar"><span id="kpi-online-bar" style="width:0%;background:var(--blue)"></span></div>
+          </article>
+          <article class="kpi-card">
+            <div class="kpi-top">
+              <div class="kpi-icon" style="color:var(--metric-cpu)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M20 15h2"/></svg></div>
+              <div class="kpi-label">Avg CPU</div>
             </div>
-            <span>Memory pressure</span>
-          </div>
-          <div class="no-data" id="no-data-ram">
-            <strong>No data available yet</strong>
-            <span>Waiting for next polling cycle</span>
-          </div>
-          <canvas id="fleet-ram-chart"></canvas>
-        </article>
-
-        <article class="panel-card">
-          <div class="panel-head">
-            <div>
-              <h4>Thermals / temperature history</h4>
-              <strong id="fleet-temp-current">—</strong>
+            <div class="kpi-value" id="kpi-cpu" style="color:var(--metric-cpu)">0%</div>
+            <div class="kpi-foot" id="kpi-cpu-foot">Avg across 0 hosts</div>
+            <div class="kpi-bar"><span id="kpi-cpu-bar" style="width:0%;background:var(--metric-cpu)"></span></div>
+            <canvas id="kpi-cpu-spark" class="kpi-spark"></canvas>
+          </article>
+          <article class="kpi-card">
+            <div class="kpi-top">
+              <div class="kpi-icon" style="color:var(--metric-ram)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
+              <div class="kpi-label">Avg RAM</div>
             </div>
-            <span>CPU temperature</span>
+            <div class="kpi-value" id="kpi-ram" style="color:var(--metric-ram)">0%</div>
+            <div class="kpi-foot" id="kpi-ram-foot">Memory pressure across fleet</div>
+            <div class="kpi-bar"><span id="kpi-ram-bar" style="width:0%;background:var(--metric-ram)"></span></div>
+            <canvas id="kpi-ram-spark" class="kpi-spark"></canvas>
+          </article>
+          <article class="kpi-card">
+            <div class="kpi-top">
+              <div class="kpi-icon" style="color:var(--metric-temp)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg></div>
+              <div class="kpi-label">Highest temp</div>
+            </div>
+            <div class="kpi-value" id="kpi-temp" style="color:var(--metric-temp)">—</div>
+            <div class="kpi-foot" id="kpi-temp-foot">Hottest sensor across fleet</div>
+            <canvas id="kpi-temp-spark" class="kpi-spark"></canvas>
+          </article>
+          <article class="kpi-card">
+            <div class="kpi-top">
+              <div class="kpi-icon" style="color:var(--metric-gpu)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="4" y="4" width="16" height="10" rx="2"/><path d="M9 14v4"/><path d="M15 14v4"/><path d="M12 18v2"/></svg></div>
+              <div class="kpi-label">GPU / VRAM</div>
+            </div>
+            <div class="kpi-value" id="kpi-gpu" style="color:var(--metric-gpu)">—</div>
+            <div class="kpi-foot" id="kpi-gpu-foot">No GPU data available</div>
+            <canvas id="kpi-gpu-spark" class="kpi-spark"></canvas>
+          </article>
+          <article class="kpi-card">
+            <div class="kpi-top">
+              <div class="kpi-icon" style="color:var(--yellow)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+              <div class="kpi-label">Alerts</div>
+            </div>
+            <div class="kpi-value" id="kpi-alerts" style="color:var(--yellow)">0</div>
+            <div class="kpi-foot" id="kpi-alerts-foot">All systems healthy</div>
+            <div class="kpi-bar"><span id="kpi-alerts-bar" style="width:0%;background:var(--yellow)"></span></div>
+          </article>
+        </section>
+
+        <section class="panel-grid" id="fleet-panels">
+          <article class="panel-card">
+            <div class="panel-head">
+              <div><h4>Fleet CPU history</h4><strong id="fleet-cpu-current">0%</strong></div>
+              <span>Avg across hosts</span>
+            </div>
+            <div class="no-data" id="no-data-cpu"><strong>No data available yet</strong><span>Waiting for next polling cycle</span></div>
+            <canvas id="fleet-cpu-chart"></canvas>
+          </article>
+          <article class="panel-card">
+            <div class="panel-head">
+              <div><h4>Fleet RAM history</h4><strong id="fleet-ram-current">0%</strong></div>
+              <span>Memory pressure</span>
+            </div>
+            <div class="no-data" id="no-data-ram"><strong>No data available yet</strong><span>Waiting for next polling cycle</span></div>
+            <canvas id="fleet-ram-chart"></canvas>
+          </article>
+          <article class="panel-card">
+            <div class="panel-head">
+              <div><h4>Thermals / temperature history</h4><strong id="fleet-temp-current">—</strong></div>
+              <span>CPU temperature</span>
+            </div>
+            <div class="no-data" id="no-data-temp"><strong>No data available yet</strong><span>Waiting for next polling cycle</span></div>
+            <canvas id="fleet-temp-chart"></canvas>
+          </article>
+        </section>
+
+        <section class="controls" id="controls">
+          <div class="searchbox">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+            <input id="search-input" type="search" placeholder="Search host, hostname, OS or GPU">
           </div>
-          <div class="no-data" id="no-data-temp">
-            <strong>No data available yet</strong>
-            <span>Waiting for next polling cycle</span>
+          <div class="filter-group">
+            <span class="filter-label">Filter</span>
+            <button class="filter-pill active" data-filter="all">All</button>
+            <button class="filter-pill" data-filter="online">Online</button>
+            <button class="filter-pill" data-filter="offline">Offline</button>
+            <button class="filter-pill" data-filter="alert">Alerts</button>
+            <button class="filter-pill" data-filter="gpu">GPU hosts</button>
           </div>
-          <canvas id="fleet-temp-chart"></canvas>
-        </article>
+          <div class="sort-group">
+            <span class="filter-label">Sort</span>
+            <button class="filter-pill active" data-sort="severity">Criticality</button>
+            <button class="filter-pill" data-sort="cpu">CPU</button>
+            <button class="filter-pill" data-sort="ram">RAM</button>
+            <button class="filter-pill" data-sort="temp">Temp</button>
+            <button class="filter-pill" data-sort="name">Name</button>
+          </div>
+        </section>
 
-      </section>
-
-      <section class="controls" id="controls">
-        <div class="searchbox">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="7"></circle>
-            <path d="m20 20-3.5-3.5"></path>
-          </svg>
-          <input id="search-input" type="search" placeholder="Search host, hostname, OS or GPU…">
+        <div class="section-head">
+          <div class="section-copy">
+            <h3>Quick Compare</h3>
+            <p>Compact server snapshots keep the fleet scan shallow. Click a server in the left rail or in this shelf to load the full telemetry stack.</p>
+          </div>
+          <span class="section-count" id="snapshot-count">0 visible</span>
         </div>
 
-        <div class="filter-group">
-          <span class="filter-label">Filter</span>
-          <button class="filter-pill active" data-filter="all">All</button>
-          <button class="filter-pill" data-filter="online">Online</button>
-          <button class="filter-pill" data-filter="offline">Offline</button>
-          <button class="filter-pill" data-filter="alert">Alerts</button>
-          <button class="filter-pill" data-filter="gpu">GPU hosts</button>
-        </div>
+        <section id="server-grid">
+          <div class="empty-state">
+            <strong>Waiting for agents</strong>
+            Start the poller or agent on each server.<br>
+            Panels and cards will appear here automatically.
+          </div>
+        </section>
+      </div>
 
-        <div class="sort-group">
-          <span class="filter-label">Sort</span>
-          <button class="filter-pill active" data-sort="severity">Criticality</button>
-          <button class="filter-pill" data-sort="cpu">CPU</button>
-          <button class="filter-pill" data-sort="ram">RAM</button>
-          <button class="filter-pill" data-sort="temp">Temp</button>
-          <button class="filter-pill" data-sort="name">Name</button>
-        </div>
-      </section>
+      <!-- ── Workspace: Detail View ── -->
+      <aside class="workspace-view" id="detail-view">
+        <div class="detail-view-panel">
+          <div class="detail-empty" id="detail-empty">
+            <div class="detail-empty-mark">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><rect x="4" y="5" width="16" height="10" rx="2"></rect><path d="M8 19h8"></path><path d="M12 15v4"></path></svg>
+            </div>
+            <strong>Pick a server from the left rail</strong>
+            <p>Its complete live context will appear here with load, thermals, GPU activity, memory pressure, history charts and sensor details, without forcing a deep vertical scroll.</p>
+          </div>
 
-      <section id="server-grid">
-        <div class="empty-state">
-          <strong>Waiting for agents</strong>
-          Start the poller or agent on each server.<br>
-          Panels and cards will appear here automatically.
+          <div class="detail-content hidden" id="detail-content">
+            <div class="detail-nav">
+              <button class="back-btn" id="detail-back-btn" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+                Clear focus
+              </button>
+              <div class="detail-nav-info">
+                <h2 id="dtl-title">Server</h2>
+                <p id="dtl-subtitle">Loading...</p>
+              </div>
+              <div class="detail-nav-pills" id="dtl-pills"></div>
+            </div>
+
+            <div class="detail-kpi-grid" id="dtl-kpis"></div>
+
+            <div class="detail-spark-grid" id="dtl-sparks"></div>
+
+            <div class="detail-chart-grid" id="dtl-charts">
+              <div class="detail-chart-card"><h4>CPU History</h4><canvas id="dtl-chart-cpu"></canvas></div>
+              <div class="detail-chart-card"><h4>RAM History</h4><canvas id="dtl-chart-ram"></canvas></div>
+            </div>
+
+            <div class="detail-sensor-grid" id="dtl-sensors"></div>
+
+            <div class="detail-sensor-grid" id="dtl-fans"></div>
+          </div>
         </div>
-      </section>
+      </aside>
+      </div>
     </main>
   </div>
 
@@ -1298,29 +1435,22 @@
       filters: { query: '', mode: 'all', sort: 'severity' },
       fleetCharts: {},
       kpiHistory: { cpu: [], ram: [], temp: [], gpu: [] },
+      selectedServerId: null,
+      detailCharts: {},
+      detailFanKeys: [],
+      initialFocusDone: false,
     };
 
     function escHtml(value) {
-      return String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
+      return String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
-
     function avg(values) {
       const nums = values.filter(v => Number.isFinite(v));
       if (!nums.length) return 0;
       return nums.reduce((sum, v) => sum + v, 0) / nums.length;
     }
-
-    function clamp(value, min, max) {
-      return Math.min(max, Math.max(min, value));
-    }
-
-    function fmtTs(ts) {
-      return new Date(ts * 1000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-    }
-
+    function clamp(value, min, max) { return Math.min(max, Math.max(min, value)); }
+    function fmtTs(ts) { return new Date(ts * 1000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }); }
     function timeAgo(ts) {
       const delta = Math.round(Date.now() / 1000 - ts);
       if (delta < 5) return 'just now';
@@ -1328,55 +1458,27 @@
       if (delta < 3600) return `${Math.floor(delta / 60)} min ago`;
       return `${Math.floor(delta / 3600)}h ago`;
     }
-
-    function pctColor(value) {
-      if (value == null) return '#8da2c6';
-      return value < 60 ? '#22c55e' : value < 80 ? '#f59e0b' : '#ef4444';
-    }
-
-    function pctClass(value) {
-      if (value == null) return 'blue';
-      return value < 60 ? 'green' : value < 80 ? 'yellow' : 'red';
-    }
-
-    function tempColor(value) {
-      if (value == null) return '#8da2c6';
-      return value < 60 ? '#22c55e' : value < 75 ? '#f59e0b' : '#ef4444';
-    }
-
-    function tempClass(value) {
-      if (value == null) return 'blue';
-      return value < 60 ? 'green' : value < 75 ? 'yellow' : 'red';
-    }
-
-    function prettifyLabel(key) {
-      return String(key).split('/').slice(1).join('/') || String(key);
-    }
+    function pctColor(value) { if (value == null) return '#8da2c6'; return value < 60 ? '#22c55e' : value < 80 ? '#f59e0b' : '#ef4444'; }
+    function pctClass(value) { if (value == null) return 'blue'; return value < 60 ? 'green' : value < 80 ? 'yellow' : 'red'; }
+    function tempColor(value) { if (value == null) return '#8da2c6'; return value < 60 ? '#22c55e' : value < 75 ? '#f59e0b' : '#ef4444'; }
+    function tempClass(value) { if (value == null) return 'blue'; return value < 60 ? 'green' : value < 75 ? 'yellow' : 'red'; }
+    function prettifyLabel(key) { return String(key).split('/').slice(1).join('/') || String(key); }
 
     function getBestTemp(data) {
       if (data?.temps && Object.keys(data.temps).length) {
-        for (const [key, value] of Object.entries(data.temps)) {
-          if (/package/i.test(key)) return { label: prettifyLabel(key), value };
-        }
-        for (const [key, value] of Object.entries(data.temps)) {
-          if (/tdie|tctl|tccd/i.test(key)) return { label: prettifyLabel(key), value };
-        }
+        for (const [key, value] of Object.entries(data.temps)) { if (/package/i.test(key)) return { label: prettifyLabel(key), value }; }
+        for (const [key, value] of Object.entries(data.temps)) { if (/tdie|tctl|tccd/i.test(key)) return { label: prettifyLabel(key), value }; }
         const [key, value] = Object.entries(data.temps)[0];
         return { label: prettifyLabel(key), value };
       }
       if (data?.cpu_temp != null) return { label: 'CPU', value: data.cpu_temp };
       return null;
     }
-
     function getAverageFanPct(data) {
       const values = Object.values(data?.fan_percentages || {}).filter(v => Number.isFinite(v));
       return values.length ? avg(values) : null;
     }
-
-    function getPrimaryFanPct(data) {
-      return data?.gpus?.[0]?.fan_pct ?? getAverageFanPct(data);
-    }
-
+    function getPrimaryFanPct(data) { return data?.gpus?.[0]?.fan_pct ?? getAverageFanPct(data); }
     function getServerSeverity(data, online = true) {
       if (!online) return 'offline';
       const temp = getBestTemp(data)?.value;
@@ -1384,7 +1486,6 @@
       if ((data?.cpu_percent ?? 0) > 75 || (data?.ram_percent ?? 0) > 80 || (data?.gpus?.[0]?.util ?? 0) > 80 || temp > 60) return 'warning';
       return 'healthy';
     }
-
     function matchesFilters(sid, server) {
       if (!server?.lastData) return false;
       const haystack = [sid, server.lastData.hostname, server.lastData.os, server.lastData.gpus?.[0]?.name].filter(Boolean).join(' ').toLowerCase();
@@ -1399,15 +1500,13 @@
     }
 
     function buildMetricRow(label, value, pct, extra, color) {
-      return `
-        <div class="metric-row">
-          <span class="metric-label">${escHtml(label)}</span>
-          <span class="metric-value" style="color:${color}">${escHtml(value)}</span>
-          <div class="metric-bar"><span style="width:${clamp(pct ?? 0, 0, 100)}%;background:${color}"></span></div>
-          <span class="metric-extra">${extra}</span>
-        </div>`;
+      return `<div class="metric-row">
+        <span class="metric-label">${escHtml(label)}</span>
+        <span class="metric-value" style="color:${color}">${escHtml(value)}</span>
+        <div class="metric-bar"><span style="width:${clamp(pct ?? 0, 0, 100)}%;background:${color}"></span></div>
+        <span class="metric-extra">${extra}</span>
+      </div>`;
     }
-
     function buildStatusBadge(data, online) {
       const severity = getServerSeverity(data, online);
       if (!online) return '<span class="badge offline">Offline</span>';
@@ -1415,93 +1514,81 @@
       if (severity === 'warning') return '<span class="badge warning">Warning</span>';
       return '<span class="badge online">Online</span>';
     }
-
     function buildFanChipRow(data) {
       const fans = data?.fans || {};
       if (!Object.keys(fans).length) return '';
       return Object.entries(fans).map(([key, rpm]) => {
         const pct = data.fan_percentages?.[key];
         const color = rpm === 0 ? '#8da2c6' : rpm < 600 ? '#f59e0b' : '#60a5fa';
-        return `
-          <div class="fan-chip">
-            <div class="fan-chip-copy">
-              <span>${escHtml(prettifyLabel(key))}</span>
-              <span>${pct != null ? `${pct}% · PWM` : 'RPM only'}</span>
-            </div>
-            <strong style="color:${color}">${rpm} rpm</strong>
-          </div>`;
+        return `<div class="fan-chip">
+          <div class="fan-chip-copy"><span>${escHtml(prettifyLabel(key))}</span><span>${pct != null ? `${pct}% · PWM` : 'RPM only'}</span></div>
+          <strong style="color:${color}">${rpm} rpm</strong>
+        </div>`;
       }).join('');
     }
-
     function sparkDefinitions(data) {
       const defs = [
         { key: 'cpu', label: 'CPU', value: `${Math.round(data?.cpu_percent ?? 0)}%`, color: '#60a5fa' },
         { key: 'ram', label: 'RAM', value: `${Math.round(data?.ram_percent ?? 0)}%`, color: '#a78bfa' },
       ];
       if (data?.gpus?.length) defs.push({ key: 'gpu', label: 'GPU', value: `${Math.round(data.gpus[0].util ?? 0)}%`, color: '#22c55e' });
+      const temp = getBestTemp(data);
+      if (temp) defs.push({ key: 'temp', label: 'Temp', value: `${temp.value.toFixed(1)}°C`, color: '#f43f5e' });
       return defs;
     }
 
-    function buildCardHTML(sid, data, expanded = false) {
+    function buildSnapshotMetric(label, value, sub, color, pct) {
+      return `<div class="snapshot-stat">
+        <div class="snapshot-stat-head">
+          <span class="snapshot-stat-label">${escHtml(label)}</span>
+          <strong class="snapshot-stat-value" style="color:${color}">${escHtml(value)}</strong>
+        </div>
+        <div class="snapshot-stat-sub">${escHtml(sub)}</div>
+        <div class="mini-bar"><span style="width:${clamp(pct ?? 0, 0, 100)}%;background:${color}"></span></div>
+      </div>`;
+    }
+
+    function buildCardHTML(sid, data) {
       const online = state.servers[sid]?.online ?? true;
       const gpu = data?.gpus?.[0] || null;
       const temp = getBestTemp(data);
-      const sparkDefs = sparkDefinitions(data);
-      const tempStatus = temp ? (temp.value < 60 ? 'normal' : temp.value < 75 ? 'warning' : 'critical') : 'n/a';
       const avgFan = getAverageFanPct(data);
-
-      const rows = [
-        buildMetricRow('CPU', `${Math.round(data.cpu_percent ?? 0)}%`, data.cpu_percent ?? 0, `${data.cpu_cores ?? '?'} cores`, pctColor(data.cpu_percent ?? 0)),
-        buildMetricRow('RAM', `${Math.round(data.ram_percent ?? 0)}%`, data.ram_percent ?? 0, `${(data.ram_used_gb ?? 0).toFixed(1)} / ${(data.ram_total_gb ?? 0).toFixed(1)} GB`, pctColor(data.ram_percent ?? 0)),
-      ];
-      if (gpu) {
-        rows.push(buildMetricRow('GPU', `${Math.round(gpu.util ?? 0)}%`, gpu.util ?? 0, escHtml(gpu.name || 'GPU'), pctColor(gpu.util ?? 0)));
-        rows.push(buildMetricRow('VRAM', `${Math.round(gpu.mem_percent ?? 0)}%`, gpu.mem_percent ?? 0, `${(gpu.mem_used_gb ?? 0).toFixed(1)} / ${(gpu.mem_total_gb ?? 0).toFixed(1)} GB`, pctColor(gpu.mem_percent ?? 0)));
+      const primaryDefs = sparkDefinitions(data).filter(def => def.key !== 'gpu').slice(0, 3);
+      if (gpu && !primaryDefs.some(def => def.key === 'temp') && primaryDefs.length < 3) {
+        primaryDefs.push({ key: 'gpu', label: 'GPU', value: `${Math.round(gpu.util ?? 0)}%`, color: '#22c55e' });
       }
-      rows.push(buildMetricRow('Temp', temp ? `${temp.value.toFixed(1)}°C` : '—', temp ? clamp(temp.value, 0, 100) : 0, tempStatus, tempColor(temp?.value)));
-      rows.push(buildMetricRow('Fan', gpu?.fan_pct != null ? `${gpu.fan_pct}%` : avgFan != null ? `${avgFan.toFixed(0)}%` : '—', gpu?.fan_pct ?? avgFan ?? 0, gpu?.fan_pct != null ? 'GPU fan' : avgFan != null ? 'SYS avg' : 'unavailable', pctColor(gpu?.fan_pct ?? avgFan ?? 0)));
 
-      return `
-        <div class="card-header">
-          <div class="card-avatar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20">
-              <rect x="4" y="5" width="16" height="10" rx="2"></rect>
-              <path d="M8 19h8"></path>
-              <path d="M12 15v4"></path>
-            </svg>
+      return `<div class="card-header">
+        <div class="card-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><rect x="4" y="5" width="16" height="10" rx="2"></rect><path d="M8 19h8"></path><path d="M12 15v4"></path></svg></div>
+        <div class="card-title">
+          <h3>${escHtml(data.hostname || sid)}</h3>
+          <div class="card-subtitle">
+            <span>ID: ${escHtml(sid)}</span><span>${escHtml(data.os || 'Unknown')}</span><span>Last seen ${escHtml(timeAgo(data.timestamp))}</span>
           </div>
-          <div class="card-title">
-            <h3>${escHtml(data.hostname || sid)}</h3>
-            <div class="card-subtitle">
-              <span>ID: ${escHtml(sid)}</span>
-              <span>${escHtml(data.os || 'Unknown')}</span>
-              <span>Last seen ${escHtml(timeAgo(data.timestamp))}</span>
-            </div>
-            <div class="badge-row">
-              ${buildStatusBadge(data, online)}
-              <span class="badge info">${escHtml(data.cpu_cores ?? '?')} cores</span>
-              ${gpu ? `<span class="badge info">${escHtml(gpu.name || 'GPU')}</span>` : ''}
-            </div>
+          <div class="badge-row">
+            ${buildStatusBadge(data, online)}
+            <span class="badge info">${escHtml(data.cpu_cores ?? '?')} cores</span>
+            ${gpu ? `<span class="badge info">${escHtml(gpu.name || 'GPU')}</span>` : ''}
           </div>
-          <button class="expand-btn ${expanded ? 'open' : ''}" onclick="toggleExpand('${escHtml(sid)}')">⌄</button>
         </div>
-
-        <div class="metric-rows">${rows.join('')}</div>
-
-        <div class="fan-chip-row" id="fans-${sid}">${buildFanChipRow(data)}</div>
-
-        <div class="spark-grid">
-          ${sparkDefs.map(def => `
-            <div class="spark-card">
-              <div class="spark-head"><span>${escHtml(def.label)}</span><strong>${escHtml(def.value)}</strong></div>
-              <canvas id="sp-${def.key}-${sid}"></canvas>
-            </div>`).join('')}
+      </div>
+      <div class="snapshot-strip">
+        ${buildSnapshotMetric('CPU', `${Math.round(data.cpu_percent ?? 0)}%`, `${data.cpu_cores ?? '?'} cores`, pctColor(data.cpu_percent ?? 0), data.cpu_percent ?? 0)}
+        ${buildSnapshotMetric('RAM', `${Math.round(data.ram_percent ?? 0)}%`, `${(data.ram_used_gb ?? 0).toFixed(1)} / ${(data.ram_total_gb ?? 0).toFixed(1)} GB`, pctColor(data.ram_percent ?? 0), data.ram_percent ?? 0)}
+        ${temp
+          ? buildSnapshotMetric('Hotspot', `${temp.value.toFixed(1)}°C`, temp.label || 'Sensor', tempColor(temp.value), clamp(temp.value, 0, 100))
+          : buildSnapshotMetric(gpu ? 'GPU' : 'Status', gpu ? `${Math.round(gpu.util ?? 0)}%` : online ? 'Stable' : 'Offline', gpu ? (gpu.name || 'Graphics load') : (online ? 'No thermal sensor' : 'Host unreachable'), gpu ? pctColor(gpu.util ?? 0) : '#8da2c6', gpu ? (gpu.util ?? 0) : online ? 42 : 0)}
+      </div>
+      <div class="snapshot-thermal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18"><path d="M14 14.76V4a2 2 0 1 0-4 0v10.76a4 4 0 1 0 4 0z"></path></svg>
+        <div class="snapshot-thermal-copy">
+          <span>${temp ? 'Thermal focus' : gpu ? 'Acceleration focus' : 'System note'}</span>
+          <strong style="color:${temp ? tempColor(temp.value) : gpu ? pctColor(gpu.util ?? 0) : '#dce7fb'}">${escHtml(temp ? `${temp.value.toFixed(1)}°C · ${temp.label}` : gpu ? `${Math.round(gpu.util ?? 0)}% · ${gpu.name || 'GPU'}` : data.os || 'Unknown')}</strong>
         </div>
-
-        <div class="card-foot">
-          <span>${escHtml(data.os || 'Unknown')}</span>
-          <strong id="upd-${sid}">${escHtml(timeAgo(data.timestamp))}</strong>
-        </div>`;
+        <span class="badge info">${escHtml(gpu?.fan_pct != null ? `${gpu.fan_pct}% fan` : avgFan != null ? `${avgFan.toFixed(0)}% fan` : online ? 'live' : 'offline')}</span>
+      </div>
+      <div class="snapshot-spark-row">${primaryDefs.map(def => `<div class="snapshot-spark"><div class="snapshot-spark-head"><span>${escHtml(def.label)}</span><strong>${escHtml(def.value)}</strong></div><canvas id="sp-${def.key}-${sid}"></canvas></div>`).join('')}</div>
+      <div class="card-foot"><span>${escHtml(data.os || 'Unknown')}</span><strong id="upd-${sid}">${escHtml(timeAgo(data.timestamp))}</strong></div>`;
     }
 
     function drawSparkline(canvas, values, color) {
@@ -1509,138 +1596,71 @@
       const dpr = window.devicePixelRatio || 1;
       const width = Math.max(100, canvas.clientWidth || canvas.offsetWidth || 100) * dpr;
       const height = Math.max(34, canvas.clientHeight || canvas.offsetHeight || 34) * dpr;
-      canvas.width = width;
-      canvas.height = height;
+      canvas.width = width; canvas.height = height;
       const ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, width, height);
-
       const xStep = width / (values.length - 1);
       const toY = value => height - (clamp(value, 0, 100) / 100) * (height * 0.84) - height * 0.08;
       const gradient = ctx.createLinearGradient(0, 0, 0, height);
-      gradient.addColorStop(0, `${color}55`);
-      gradient.addColorStop(1, `${color}05`);
-
-      ctx.beginPath();
-      ctx.moveTo(0, toY(values[0]));
+      gradient.addColorStop(0, `${color}55`); gradient.addColorStop(1, `${color}05`);
+      ctx.beginPath(); ctx.moveTo(0, toY(values[0]));
       for (let i = 1; i < values.length; i++) ctx.lineTo(i * xStep, toY(values[i]));
-      ctx.lineTo((values.length - 1) * xStep, height);
-      ctx.lineTo(0, height);
-      ctx.closePath();
-      ctx.fillStyle = gradient;
-      ctx.fill();
-
-      ctx.beginPath();
-      ctx.moveTo(0, toY(values[0]));
+      ctx.lineTo((values.length - 1) * xStep, height); ctx.lineTo(0, height); ctx.closePath();
+      ctx.fillStyle = gradient; ctx.fill();
+      ctx.beginPath(); ctx.moveTo(0, toY(values[0]));
       for (let i = 1; i < values.length; i++) ctx.lineTo(i * xStep, toY(values[i]));
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 1.6 * dpr;
-      ctx.lineJoin = 'round';
-      ctx.lineCap = 'round';
-      ctx.stroke();
+      ctx.strokeStyle = color; ctx.lineWidth = 1.6 * dpr; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
     }
 
     function refreshSparklines(sid) {
       const history = (state.servers[sid]?.history || []).slice(-SPARK_POINTS);
       if (history.length < 2) return;
-
       drawSparkline(document.getElementById(`sp-cpu-${sid}`), history.map(item => item.cpu_percent ?? 0), '#60a5fa');
       drawSparkline(document.getElementById(`sp-ram-${sid}`), history.map(item => item.ram_percent ?? 0), '#a78bfa');
-      if (history.some(item => item.gpus?.length)) {
-        drawSparkline(document.getElementById(`sp-gpu-${sid}`), history.map(item => item.gpus?.[0]?.util ?? 0), '#22c55e');
-      }
+      if (history.some(item => item.gpus?.length)) drawSparkline(document.getElementById(`sp-gpu-${sid}`), history.map(item => item.gpus?.[0]?.util ?? 0), '#22c55e');
+      if (history.some(item => getBestTemp(item))) drawSparkline(document.getElementById(`sp-temp-${sid}`), history.map(item => getBestTemp(item)?.value ?? 0), '#f43f5e');
     }
 
-    function chartOptions(unit, maxY = 100, legend = false) {
+    function chartOptions(unit, maxY, legend) {
       return {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: { duration: 280 },
+        responsive: true, maintainAspectRatio: false, animation: { duration: 280 },
         interaction: { mode: 'index', intersect: false },
         scales: {
-          x: {
-            ticks: { color: '#8da2c6', maxTicksLimit: 6, maxRotation: 0, font: { size: 10 } },
-            grid: { color: 'rgba(148, 163, 184, 0.08)' },
-          },
-          y: {
-            min: 0,
-            ...(maxY != null ? { max: maxY } : {}),
-            ticks: {
-              color: '#8da2c6',
-              font: { size: 10 },
-              callback: value => `${value}${unit}`,
-            },
-            grid: { color: 'rgba(148, 163, 184, 0.08)' },
-          },
+          x: { ticks: { color: '#8da2c6', maxTicksLimit: 6, maxRotation: 0, font: { size: 10 } }, grid: { color: 'rgba(148, 163, 184, 0.08)' } },
+          y: { min: 0, ...(maxY != null ? { max: maxY } : {}), ticks: { color: '#8da2c6', font: { size: 10 }, callback: value => `${value}${unit}` }, grid: { color: 'rgba(148, 163, 184, 0.08)' } },
         },
         plugins: {
           legend: legend ? { labels: { color: '#d4def0', boxWidth: 10, usePointStyle: true } } : { display: false },
-          tooltip: {
-            backgroundColor: '#0f1728',
-            borderColor: 'rgba(148, 163, 184, 0.16)',
-            borderWidth: 1,
-            titleColor: '#e5edf9',
-            bodyColor: '#d4def0',
-            callbacks: {
-              label: context => ` ${context.dataset.label}: ${Number(context.parsed.y).toFixed(1)}${unit}`,
-            },
-          },
+          tooltip: { backgroundColor: '#0f1728', borderColor: 'rgba(148, 163, 184, 0.16)', borderWidth: 1, titleColor: '#e5edf9', bodyColor: '#d4def0', callbacks: { label: context => ` ${context.dataset.label}: ${Number(context.parsed.y).toFixed(1)}${unit}` } },
         },
       };
     }
 
-    function makeChart(canvasId, datasets, labels, unit = '%', maxY = 100, legend = false) {
+    function makeChart(canvasId, datasets, labels, unit, maxY, legend) {
       const canvas = document.getElementById(canvasId);
       if (!canvas || typeof Chart === 'undefined') return null;
       return new Chart(canvas.getContext('2d'), {
         type: 'line',
-        data: {
-          labels,
-          datasets: datasets.map(ds => ({
-            label: ds.label,
-            data: ds.values,
-            borderColor: ds.color,
-            backgroundColor: `${ds.color}22`,
-            pointRadius: 0,
-            borderWidth: 1.8,
-            fill: true,
-            tension: 0.32,
-            spanGaps: true,
-          })),
-        },
+        data: { labels, datasets: datasets.map(ds => ({ label: ds.label, data: ds.values, borderColor: ds.color, backgroundColor: `${ds.color}22`, pointRadius: 0, borderWidth: 1.8, fill: true, tension: 0.32, spanGaps: true })) },
         options: chartOptions(unit, maxY, legend),
       });
     }
 
-    function aggregateFleetSeries(limit = FLEET_POINTS) {
-      const histories = Object.values(state.servers)
-        .map(server => server.history || [])
-        .filter(history => history.length);
-
-      if (!histories.length) {
-        return { labels: [], cpu: [], ram: [], temp: [] };
-      }
-
+    function aggregateFleetSeries(limit) {
+      limit = limit || FLEET_POINTS;
+      const histories = Object.values(state.servers).map(server => server.history || []).filter(history => history.length);
+      if (!histories.length) return { labels: [], cpu: [], ram: [], temp: [] };
       const maxLen = Math.min(limit, Math.max(...histories.map(history => history.length)));
-      const labels = [];
-      const cpu = [];
-      const ram = [];
-      const temp = [];
-
+      const labels = [], cpu = [], ram = [], temp = [];
       for (let offset = maxLen; offset >= 1; offset--) {
-        const points = histories
-          .map(history => history[history.length - offset])
-          .filter(Boolean);
-
+        const points = histories.map(history => history[history.length - offset]).filter(Boolean);
         if (!points.length) continue;
         labels.push(fmtTs(points[points.length - 1].timestamp));
         cpu.push(avg(points.map(point => point.cpu_percent ?? 0)));
         ram.push(avg(points.map(point => point.ram_percent ?? 0)));
-
         const tempVals = points.map(point => getBestTemp(point)?.value).filter(v => Number.isFinite(v));
         temp.push(tempVals.length ? avg(tempVals) : null);
-
       }
-
       return { labels, cpu, ram, temp };
     }
 
@@ -1650,24 +1670,19 @@
       document.getElementById('no-data-cpu')?.classList.toggle('hidden', hasData);
       document.getElementById('no-data-ram')?.classList.toggle('hidden', hasData);
       document.getElementById('no-data-temp')?.classList.toggle('hidden', hasData);
-
       const defs = [
         { key: 'cpu', canvas: 'fleet-cpu-chart', unit: '%', maxY: 100, color: '#38bdf8', currentId: 'fleet-cpu-current', values: series.cpu, label: 'CPU' },
         { key: 'ram', canvas: 'fleet-ram-chart', unit: '%', maxY: 100, color: '#a78bfa', currentId: 'fleet-ram-current', values: series.ram, label: 'RAM' },
         { key: 'temp', canvas: 'fleet-temp-chart', unit: '°C', maxY: null, color: '#f43f5e', currentId: 'fleet-temp-current', values: series.temp, label: 'Temp' },
       ];
-
       defs.forEach(def => {
         const latest = [...def.values].reverse().find(v => Number.isFinite(v));
         document.getElementById(def.currentId).textContent = latest != null ? `${latest.toFixed(1)}${def.unit}` : '—';
-
         if (!state.fleetCharts[def.key]) {
           state.fleetCharts[def.key] = makeChart(def.canvas, [{ label: def.label, values: def.values, color: def.color }], series.labels, def.unit, def.maxY);
         } else {
           const chart = state.fleetCharts[def.key];
-          chart.data.labels = series.labels;
-          chart.data.datasets[0].data = def.values;
-          chart.update('none');
+          chart.data.labels = series.labels; chart.data.datasets[0].data = def.values; chart.update('none');
         }
       });
     }
@@ -1678,7 +1693,6 @@
       const hasGpuFan = history.some(item => item.gpus?.[0]?.fan_pct != null);
       const fanKeys = [...new Set(history.flatMap(item => Object.keys(item.fan_percentages || {})))].slice(0, 6);
       const hasSystemFanPct = fanKeys.length > 0;
-
       const summaryTiles = [
         { label: 'CPU', value: `${Math.round(data.cpu_percent ?? 0)}%`, cls: pctClass(data.cpu_percent ?? 0) },
         { label: 'RAM', value: `${Math.round(data.ram_percent ?? 0)}%`, cls: pctClass(data.ram_percent ?? 0) },
@@ -1693,60 +1707,18 @@
       }
       const avgFan = getAverageFanPct(data);
       if (avgFan != null) summaryTiles.push({ label: 'SYS fan', value: `${avgFan.toFixed(1)}%`, cls: pctClass(avgFan) });
-
       return {
-        html: `
-          <div class="expand-summary">
-            ${summaryTiles.map(tile => `
-              <div class="summary-tile">
-                <div class="label">${escHtml(tile.label)}</div>
-                <div class="value ${tile.cls}">${escHtml(tile.value)}</div>
-              </div>`).join('')}
-          </div>
-
+        html: `<div class="expand-summary">${summaryTiles.map(tile => `<div class="summary-tile"><div class="label">${escHtml(tile.label)}</div><div class="value ${tile.cls}">${escHtml(tile.value)}</div></div>`).join('')}</div>
           <div class="detail-grid">
-            <div class="detail-card">
-              <h4 class="detail-title">CPU</h4>
-              <canvas id="detail-cpu-${sid}"></canvas>
-              <div class="detail-caption">CPU utilization over local history.</div>
-            </div>
-            <div class="detail-card">
-              <h4 class="detail-title">RAM</h4>
-              <canvas id="detail-ram-${sid}"></canvas>
-              <div class="detail-caption">Memory pressure and system consumption.</div>
-            </div>
-            ${hasGpu ? `
-              <div class="detail-card">
-                <h4 class="detail-title">GPU & VRAM</h4>
-                <canvas id="detail-gpu-${sid}"></canvas>
-                <div class="detail-caption">GPU load and video memory saturation.</div>
-              </div>` : ''}
-            ${hasTemp ? `
-              <div class="detail-card">
-                <h4 class="detail-title">Thermique CPU</h4>
-                <canvas id="detail-temp-${sid}"></canvas>
-                <div class="detail-caption">Temperature from the most representative sensors.</div>
-              </div>` : ''}
-            ${hasGpuFan ? `
-              <div class="detail-card">
-                <h4 class="detail-title">Ventilateur GPU</h4>
-                <canvas id="detail-gpufan-${sid}"></canvas>
-                <div class="detail-caption">GPU fan percentage over time.</div>
-              </div>` : ''}
-            ${hasSystemFanPct ? `
-              <div class="detail-card">
-                <h4 class="detail-title">Ventilateurs carte mère</h4>
-                <canvas id="detail-fans-${sid}"></canvas>
-                <div class="detail-caption">PWM channels exposed by the machine.</div>
-              </div>` : ''}
+            <div class="detail-card"><h4 class="detail-title">CPU</h4><canvas id="detail-cpu-${sid}"></canvas><div class="detail-caption">CPU utilization over local history.</div></div>
+            <div class="detail-card"><h4 class="detail-title">RAM</h4><canvas id="detail-ram-${sid}"></canvas><div class="detail-caption">Memory pressure and system consumption.</div></div>
+            ${hasGpu ? `<div class="detail-card"><h4 class="detail-title">GPU & VRAM</h4><canvas id="detail-gpu-${sid}"></canvas><div class="detail-caption">GPU load and video memory saturation.</div></div>` : ''}
+            ${hasTemp ? `<div class="detail-card"><h4 class="detail-title">CPU Temp</h4><canvas id="detail-temp-${sid}"></canvas><div class="detail-caption">Temperature from the most representative sensors.</div></div>` : ''}
+            ${hasGpuFan ? `<div class="detail-card"><h4 class="detail-title">GPU Fan</h4><canvas id="detail-gpufan-${sid}"></canvas><div class="detail-caption">GPU fan percentage over time.</div></div>` : ''}
+            ${hasSystemFanPct ? `<div class="detail-card"><h4 class="detail-title">Motherboard Fans</h4><canvas id="detail-fans-${sid}"></canvas><div class="detail-caption">PWM channels exposed by the machine.</div></div>` : ''}
           </div>
-
           <div class="sensor-panels" id="sensor-panels-${sid}"></div>`,
-        fanKeys,
-        hasGpu,
-        hasTemp,
-        hasGpuFan,
-        hasSystemFanPct,
+        fanKeys, hasGpu, hasTemp, hasGpuFan, hasSystemFanPct,
       };
     }
 
@@ -1755,43 +1727,18 @@
       const temps = Object.entries(data?.temps || {});
       const fans = Object.entries(data?.fans || {});
       const fanPercentages = Object.entries(data?.fan_percentages || {});
-
       const blocks = [];
-
       if (temps.length) {
-        blocks.push(`
-          <div class="sensor-panel">
-            <h4 class="detail-title">Températures</h4>
-            <div class="sensor-grid">
-              ${temps.map(([key, value]) => `
-                <div class="sensor-item">
-                  <div class="name">${escHtml(prettifyLabel(key))}</div>
-                  <div class="value" style="color:${tempColor(value)}">${escHtml(value)}°C</div>
-                </div>`).join('')}
-            </div>
-          </div>`);
+        blocks.push(`<div class="sensor-panel"><h4 class="detail-title">Temperatures</h4><div class="sensor-grid">${temps.map(([key, value]) => `<div class="sensor-item"><div class="name">${escHtml(prettifyLabel(key))}</div><div class="value" style="color:${tempColor(value)}">${escHtml(value)}°C</div></div>`).join('')}</div></div>`);
       }
-
       if (fans.length || fanPercentages.length) {
         const mergedKeys = [...new Set([...fans.map(([key]) => key), ...fanPercentages.map(([key]) => key)])];
-        blocks.push(`
-          <div class="sensor-panel">
-            <h4 class="detail-title">Ventilateurs</h4>
-            <div class="sensor-grid">
-              ${mergedKeys.map(key => {
-                const rpm = data.fans?.[key];
-                const pct = data.fan_percentages?.[key];
-                const rpmColor = rpm == null ? '#8da2c6' : rpm === 0 ? '#8da2c6' : rpm < 600 ? '#f59e0b' : '#60a5fa';
-                return `
-                  <div class="sensor-item">
-                    <div class="name">${escHtml(prettifyLabel(key))}</div>
-                    <div class="value" style="color:${rpm != null ? rpmColor : pctColor(pct)}">${rpm != null ? `${rpm} rpm` : ''}${rpm != null && pct != null ? ' · ' : ''}${pct != null ? `${pct}%` : ''}</div>
-                  </div>`;
-              }).join('')}
-            </div>
-          </div>`);
+        blocks.push(`<div class="sensor-panel"><h4 class="detail-title">Fans</h4><div class="sensor-grid">${mergedKeys.map(key => {
+          const rpm = data.fans?.[key]; const pct = data.fan_percentages?.[key];
+          const rpmColor = rpm == null ? '#8da2c6' : rpm === 0 ? '#8da2c6' : rpm < 600 ? '#f59e0b' : '#60a5fa';
+          return `<div class="sensor-item"><div class="name">${escHtml(prettifyLabel(key))}</div><div class="value" style="color:${rpm != null ? rpmColor : pctColor(pct)}">${rpm != null ? `${rpm} rpm` : ''}${rpm != null && pct != null ? ' · ' : ''}${pct != null ? `${pct}%` : ''}</div></div>`;
+        }).join('')}</div></div>`);
       }
-
       container.innerHTML = blocks.join('');
     }
 
@@ -1804,80 +1751,35 @@
     async function toggleExpand(sid) {
       const card = document.getElementById(`card-${sid}`);
       if (!card) return;
-
       const server = state.servers[sid];
       const body = card.querySelector('.card-body');
       const expand = card.querySelector('.card-expand');
       const isOpen = expand.classList.contains('open');
-
       if (isOpen) {
-        expand.classList.remove('open');
-        destroyExpandCharts(server);
-        expand.innerHTML = '';
+        expand.classList.remove('open'); destroyExpandCharts(server); expand.innerHTML = '';
         body.innerHTML = buildCardHTML(sid, server.lastData, false);
-        requestAnimationFrame(() => refreshSparklines(sid));
-        return;
+        requestAnimationFrame(() => refreshSparklines(sid)); return;
       }
-
       let history = server.history || [];
-      try {
-        const response = await fetch(`/api/history/${encodeURIComponent(sid)}`);
-        if (response.ok) history = await response.json();
-      } catch (_) {}
-
+      try { const response = await fetch(`/api/history/${encodeURIComponent(sid)}`); if (response.ok) history = await response.json(); } catch (_) {}
       if (!history.length && server.lastData) history = [server.lastData];
       const latest = history[history.length - 1] || server.lastData;
       const detail = buildExpandHTML(sid, latest, history);
-
-      body.innerHTML = buildCardHTML(sid, latest, true);
-      expand.classList.add('open');
+      body.innerHTML = buildCardHTML(sid, latest, true); expand.classList.add('open');
       expand.innerHTML = `<div class="expand-inner">${detail.html}</div>`;
-
       const labels = history.map(item => fmtTs(item.timestamp));
       const charts = {
         cpu: makeChart(`detail-cpu-${sid}`, [{ label: 'CPU', values: history.map(item => item.cpu_percent ?? 0), color: '#60a5fa' }], labels, '%', 100),
         ram: makeChart(`detail-ram-${sid}`, [{ label: 'RAM', values: history.map(item => item.ram_percent ?? 0), color: '#a78bfa' }], labels, '%', 100),
       };
-
-      if (detail.hasGpu) {
-        charts.gpu = makeChart(`detail-gpu-${sid}`,
-          [
-            { label: 'GPU', values: history.map(item => item.gpus?.[0]?.util ?? 0), color: '#22c55e' },
-            { label: 'VRAM', values: history.map(item => item.gpus?.[0]?.mem_percent ?? 0), color: '#f59e0b' },
-          ],
-          labels,
-          '%',
-          100,
-          true
-        );
-      }
-
-      if (detail.hasTemp) {
-        charts.temp = makeChart(`detail-temp-${sid}`, [{ label: 'Temp', values: history.map(item => getBestTemp(item)?.value ?? null), color: '#ef4444' }], labels, '°C', null);
-      }
-
-      if (detail.hasGpuFan) {
-        charts.gpuFan = makeChart(`detail-gpufan-${sid}`, [{ label: 'GPU fan', values: history.map(item => item.gpus?.[0]?.fan_pct ?? null), color: '#f472b6' }], labels, '%', 100);
-      }
-
+      if (detail.hasGpu) charts.gpu = makeChart(`detail-gpu-${sid}`, [{ label: 'GPU', values: history.map(item => item.gpus?.[0]?.util ?? 0), color: '#22c55e' }, { label: 'VRAM', values: history.map(item => item.gpus?.[0]?.mem_percent ?? 0), color: '#f59e0b' }], labels, '%', 100, true);
+      if (detail.hasTemp) charts.temp = makeChart(`detail-temp-${sid}`, [{ label: 'Temp', values: history.map(item => getBestTemp(item)?.value ?? null), color: '#ef4444' }], labels, '°C', null);
+      if (detail.hasGpuFan) charts.gpuFan = makeChart(`detail-gpufan-${sid}`, [{ label: 'GPU fan', values: history.map(item => item.gpus?.[0]?.fan_pct ?? null), color: '#f472b6' }], labels, '%', 100);
       if (detail.hasSystemFanPct) {
         const colors = ['#22d3ee', '#60a5fa', '#34d399', '#f59e0b', '#a78bfa', '#fb7185'];
-        charts.systemFans = makeChart(
-          `detail-fans-${sid}`,
-          detail.fanKeys.map((key, index) => ({
-            label: prettifyLabel(key),
-            values: history.map(item => item.fan_percentages?.[key] ?? null),
-            color: colors[index % colors.length],
-          })),
-          labels,
-          '%',
-          100,
-          true
-        );
+        charts.systemFans = makeChart(`detail-fans-${sid}`, detail.fanKeys.map((key, index) => ({ label: prettifyLabel(key), values: history.map(item => item.fan_percentages?.[key] ?? null), color: colors[index % colors.length] })), labels, '%', 100, true);
       }
-
-      server.expandCharts = charts;
-      server.expandFanKeys = detail.fanKeys;
+      server.expandCharts = charts; server.expandFanKeys = detail.fanKeys;
       renderSensors(latest, document.getElementById(`sensor-panels-${sid}`));
       requestAnimationFrame(() => refreshSparklines(sid));
     }
@@ -1885,60 +1787,34 @@
     function appendToExpandCharts(sid, data) {
       const server = state.servers[sid];
       if (!server?.expandCharts) return;
-
       const label = fmtTs(data.timestamp);
       const push = (chart, values) => {
         if (!chart) return;
-        chart.data.labels.push(label);
-        values.forEach((value, index) => chart.data.datasets[index]?.data.push(value));
-        if (chart.data.labels.length > 1440) {
-          chart.data.labels.shift();
-          chart.data.datasets.forEach(dataset => dataset.data.shift());
-        }
+        chart.data.labels.push(label); values.forEach((value, index) => chart.data.datasets[index]?.data.push(value));
+        if (chart.data.labels.length > 1440) { chart.data.labels.shift(); chart.data.datasets.forEach(dataset => dataset.data.shift()); }
         chart.update('none');
       };
-
       push(server.expandCharts.cpu, [data.cpu_percent ?? 0]);
       push(server.expandCharts.ram, [data.ram_percent ?? 0]);
       push(server.expandCharts.gpu, [data.gpus?.[0]?.util ?? 0, data.gpus?.[0]?.mem_percent ?? 0]);
       push(server.expandCharts.temp, [getBestTemp(data)?.value ?? null]);
       push(server.expandCharts.gpuFan, [data.gpus?.[0]?.fan_pct ?? null]);
-
       if (server.expandCharts.systemFans) {
-        const chart = server.expandCharts.systemFans;
-        chart.data.labels.push(label);
-        chart.data.datasets.forEach((dataset, index) => {
-          const key = server.expandFanKeys?.[index];
-          dataset.data.push(key ? (data.fan_percentages?.[key] ?? null) : null);
-        });
-        if (chart.data.labels.length > 1440) {
-          chart.data.labels.shift();
-          chart.data.datasets.forEach(dataset => dataset.data.shift());
-        }
+        const chart = server.expandCharts.systemFans; chart.data.labels.push(label);
+        chart.data.datasets.forEach((dataset, index) => { const key = server.expandFanKeys?.[index]; dataset.data.push(key ? (data.fan_percentages?.[key] ?? null) : null); });
+        if (chart.data.labels.length > 1440) { chart.data.labels.shift(); chart.data.datasets.forEach(dataset => dataset.data.shift()); }
         chart.update('none');
       }
-
       renderSensors(data, document.getElementById(`sensor-panels-${sid}`));
     }
 
     function cardOrderValue(server) {
       const severity = getServerSeverity(server.lastData, server.online);
       const sort = state.filters.sort || 'severity';
-      if (sort === 'name') {
-        const name = (server.lastData?.hostname || server.lastData?.server_id || '').toLowerCase();
-        let hash = 0;
-        for (let i = 0; i < name.length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i);
-        return hash;
-      }
-      if (sort === 'cpu') {
-        return 10000 - Math.round(server.lastData?.cpu_percent ?? 0);
-      }
-      if (sort === 'ram') {
-        return 10000 - Math.round(server.lastData?.ram_percent ?? 0);
-      }
-      if (sort === 'temp') {
-        return 10000 - Math.round(getBestTemp(server.lastData)?.value ?? 0);
-      }
+      if (sort === 'name') { const name = (server.lastData?.hostname || server.lastData?.server_id || '').toLowerCase(); let hash = 0; for (let i = 0; i < name.length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i); return hash; }
+      if (sort === 'cpu') return 10000 - Math.round(server.lastData?.cpu_percent ?? 0);
+      if (sort === 'ram') return 10000 - Math.round(server.lastData?.ram_percent ?? 0);
+      if (sort === 'temp') return 10000 - Math.round(getBestTemp(server.lastData)?.value ?? 0);
       const base = severity === 'critical' ? 0 : severity === 'warning' ? 1000 : server.online ? 2000 : 3000;
       const load = 100 - Math.round((server.lastData?.cpu_percent ?? 0) + (server.lastData?.gpus?.[0]?.util ?? 0) * 0.2);
       return base + load;
@@ -1947,11 +1823,10 @@
     function createCard(sid, data) {
       const grid = document.getElementById('server-grid');
       grid.querySelector('.empty-state')?.remove();
-
       const card = document.createElement('article');
-      card.id = `card-${sid}`;
-      card.className = 'server-card fade-in';
-      card.innerHTML = '<div class="card-body"></div><div class="card-expand"></div>';
+      card.id = `card-${sid}`; card.className = 'server-card fade-in';
+      card.addEventListener('click', () => selectServer(sid));
+      card.innerHTML = '<div class="card-body"></div>';
       grid.appendChild(card);
       requestAnimationFrame(() => updateCard(sid, data));
     }
@@ -1959,73 +1834,48 @@
     function updateCard(sid, data) {
       const server = state.servers[sid];
       let card = document.getElementById(`card-${sid}`);
-      if (!card) {
-        createCard(sid, data);
-        return;
-      }
-
-      const expand = card.querySelector('.card-expand');
-      const isOpen = expand.classList.contains('open');
+      if (!card) { createCard(sid, data); return; }
       const severity = getServerSeverity(data, server.online);
       const hadFade = card.classList.contains('fade-in');
-      card.className = `server-card${hadFade ? ' fade-in' : ''}${server.online ? '' : ' offline'}${severity === 'warning' ? ' warning' : ''}${severity === 'critical' ? ' critical' : ''}`;
+      card.className = `server-card${hadFade ? ' fade-in' : ''}${server.online ? '' : ' offline'}${severity === 'warning' ? ' warning' : ''}${severity === 'critical' ? ' critical' : ''}${state.selectedServerId === sid ? ' active' : ''}`;
       card.style.order = String(cardOrderValue(server));
-      card.querySelector('.card-body').innerHTML = buildCardHTML(sid, data, isOpen);
-
+      card.querySelector('.card-body').innerHTML = buildCardHTML(sid, data);
       requestAnimationFrame(() => refreshSparklines(sid));
-      appendToExpandCharts(sid, data);
     }
 
     function ensureEmptyState() {
       const grid = document.getElementById('server-grid');
       const visibleCards = [...grid.querySelectorAll('.server-card')].filter(card => !card.classList.contains('hidden')).length;
+      const count = document.getElementById('snapshot-count');
+      if (count) count.textContent = `${visibleCards} visible`;
       let empty = grid.querySelector('.empty-state');
       if (!visibleCards) {
-        if (!empty) {
-          empty = document.createElement('div');
-          empty.className = 'empty-state';
-          empty.innerHTML = '<strong>No matching servers</strong>Adjust your search or change the filter.';
-          grid.appendChild(empty);
-        }
-      } else {
-        empty?.remove();
-      }
+        if (!empty) { empty = document.createElement('div'); empty.className = 'empty-state'; empty.innerHTML = '<strong>No matching servers</strong>Adjust your search or change the filter.'; grid.appendChild(empty); }
+      } else { empty?.remove(); }
     }
 
     function setEmptyState(title, message) {
       const grid = document.getElementById('server-grid');
       let empty = grid.querySelector('.empty-state');
-      if (!empty) {
-        empty = document.createElement('div');
-        empty.className = 'empty-state';
-        grid.appendChild(empty);
-      }
+      if (!empty) { empty = document.createElement('div'); empty.className = 'empty-state'; grid.appendChild(empty); }
       empty.innerHTML = `<strong>${escHtml(title)}</strong>${escHtml(message)}`;
+      const count = document.getElementById('snapshot-count');
+      if (count) count.textContent = '0 visible';
     }
 
-    function setApiStatus(text) {
-      const api = document.getElementById('side-api');
-      if (api) api.textContent = text;
-    }
-
-    function hasDashboardOrigin() {
-      return ['http:', 'https:'].includes(location.protocol) && Boolean(location.host);
-    }
-
+    function setApiStatus(text) { const api = document.getElementById('side-api'); if (api) api.textContent = text; }
+    function hasDashboardOrigin() { return ['http:', 'https:'].includes(location.protocol) && Boolean(location.host); }
     function setFilterMode(mode) {
       state.filters.mode = mode || 'all';
-      document.querySelectorAll('.filter-group .filter-pill').forEach(item => {
-        item.classList.toggle('active', item.dataset.filter === state.filters.mode);
-      });
+      document.querySelectorAll('.filter-group .filter-pill').forEach(item => item.classList.toggle('active', item.dataset.filter === state.filters.mode));
     }
-
     function setSortMode(mode) {
       state.filters.sort = mode || 'severity';
-      document.querySelectorAll('.sort-group .filter-pill').forEach(item => {
-        item.classList.toggle('active', item.dataset.sort === state.filters.sort);
-      });
+      document.querySelectorAll('.sort-group .filter-pill').forEach(item => item.classList.toggle('active', item.dataset.sort === state.filters.sort));
     }
-
+    function refreshCardSelection() {
+      document.querySelectorAll('#server-grid .server-card').forEach(card => card.classList.toggle('active', card.id === `card-${state.selectedServerId}`));
+    }
     function applyFilters() {
       for (const [sid, server] of Object.entries(state.servers)) {
         const card = document.getElementById(`card-${sid}`);
@@ -2034,14 +1884,288 @@
         card.classList.toggle('hidden', !visible);
         if (visible) card.style.order = String(cardOrderValue(server));
       }
+      refreshCardSelection();
       ensureEmptyState();
     }
 
-    function drawKpiSpark(canvasId, values, color) {
-      const canvas = document.getElementById(canvasId);
-      if (!canvas || values.length < 2) return;
-      drawSparkline(canvas, values, color);
+    function drawKpiSpark(canvasId, values, color) { const canvas = document.getElementById(canvasId); if (!canvas || values.length < 2) return; drawSparkline(canvas, values, color); }
+
+    // ── Server List (sidebar) ──
+    function updateServerList() {
+      const listEl = document.getElementById('server-list');
+      const entries = Object.entries(state.servers).filter(([, s]) => s.lastData);
+      if (!entries.length) {
+        listEl.innerHTML = '<div class="server-list-empty">No servers connected yet</div>';
+        return;
+      }
+      const sorted = [...entries].sort((a, b) => {
+        const sa = getServerSeverity(a[1].lastData, a[1].online);
+        const sb = getServerSeverity(b[1].lastData, b[1].online);
+        const order = { critical: 0, warning: 1, healthy: 2, offline: 3 };
+        return (order[sa] ?? 2) - (order[sb] ?? 2);
+      });
+      listEl.innerHTML = sorted.map(([sid, server]) => {
+        const data = server.lastData;
+        const severity = getServerSeverity(data, server.online);
+        const cpu = data.cpu_percent ?? 0;
+        const ram = data.ram_percent ?? 0;
+        const cpuColor = pctColor(cpu);
+        const ramColor = pctColor(ram);
+        return `<div class="server-list-item${server.online ? '' : ' offline'}${state.selectedServerId === sid ? ' active' : ''}" data-sid="${escHtml(sid)}">
+          <div class="server-status-dot ${severity}"></div>
+          <div class="server-list-info">
+            <div class="server-list-name">${escHtml(data.hostname || sid)}</div>
+            <div class="server-list-meta"><span>${escHtml(data.os || '')}</span><span>${escHtml(timeAgo(data.timestamp))}</span></div>
+          </div>
+          <div class="server-list-bars">
+            <div class="server-list-bar"><span style="width:${clamp(cpu, 0, 100)}%;background:${cpuColor}"></span></div>
+            <div class="server-list-bar"><span style="width:${clamp(ram, 0, 100)}%;background:${ramColor}"></span></div>
+          </div>
+        </div>`;
+      }).join('');
+      listEl.querySelectorAll('.server-list-item').forEach(item => {
+        item.addEventListener('click', () => selectServer(item.dataset.sid));
+      });
     }
+
+    function getPreferredServerId() {
+      const entries = Object.entries(state.servers).filter(([, server]) => server.lastData);
+      if (!entries.length) return null;
+      return [...entries].sort((a, b) => cardOrderValue(a[1]) - cardOrderValue(b[1]))[0]?.[0] || null;
+    }
+
+    function maybeSelectInitialServer() {
+      if (state.initialFocusDone || state.selectedServerId) return;
+      const sid = getPreferredServerId();
+      if (!sid) return;
+      state.initialFocusDone = true;
+      showServerDetail(sid);
+    }
+
+    // ── Server Detail View (full workspace) ──
+
+    function destroyDetailCharts() {
+      Object.values(state.detailCharts).forEach(chart => chart?.destroy?.());
+      state.detailCharts = {};
+    }
+
+    function selectServer(sid) {
+      const server = state.servers[sid];
+      if (!server?.lastData) return;
+      if (state.selectedServerId === sid) return;
+      showServerDetail(sid);
+    }
+
+    function showGridView() {
+      state.selectedServerId = null;
+      state.detailFanKeys = [];
+      destroyDetailCharts();
+      document.getElementById('detail-empty').classList.remove('hidden');
+      document.getElementById('detail-content').classList.add('hidden');
+      document.getElementById('overview-focus').textContent = 'No server selected';
+      document.getElementById('overview-caption').textContent = 'Use the left rail to jump between hosts, keep the fleet pulse in view, and inspect full telemetry on the right without losing the operational overview.';
+      updateServerList();
+      refreshCardSelection();
+    }
+
+    async function showServerDetail(sid) {
+      state.selectedServerId = sid;
+      destroyDetailCharts();
+
+      document.getElementById('detail-empty').classList.add('hidden');
+      document.getElementById('detail-content').classList.remove('hidden');
+
+      updateServerList();
+      refreshCardSelection();
+
+      const server = state.servers[sid];
+      const data = server.lastData;
+      const gpu = data?.gpus?.[0] || null;
+      const temp = getBestTemp(data);
+      const avgFan = getAverageFanPct(data);
+      const requestedSid = sid;
+
+      document.getElementById('overview-focus').textContent = data.hostname || sid;
+      document.getElementById('overview-caption').textContent = `Focused telemetry for ${data.hostname || sid}. The detail pane keeps the live load, thermals, memory pressure and component health readable without collapsing the fleet overview.`;
+
+      document.getElementById('dtl-title').textContent = data.hostname || sid;
+      document.getElementById('dtl-subtitle').textContent = `ID: ${sid} · ${data.os || 'Unknown'} · ${data.cpu_cores || '?'} cores · Last seen ${timeAgo(data.timestamp)}`;
+      document.getElementById('dtl-pills').innerHTML = `
+        ${buildStatusBadge(data, server.online)}
+        ${gpu ? `<span class="pill" style="font-size:0.72rem;padding:6px 10px">${escHtml(gpu.name)}</span>` : ''}
+        ${temp ? `<span class="pill" style="font-size:0.72rem;padding:6px 10px">${escHtml(temp.value.toFixed(1))}°C hotspot</span>` : ''}
+      `;
+
+      const kpis = [
+        { label: 'CPU', value: `${Math.round(data.cpu_percent ?? 0)}%`, pct: data.cpu_percent ?? 0, color: '#38bdf8', sub: `${data.cpu_cores ?? '?'} cores` },
+        { label: 'RAM', value: `${Math.round(data.ram_percent ?? 0)}%`, pct: data.ram_percent ?? 0, color: '#a78bfa', sub: `${(data.ram_used_gb ?? 0).toFixed(1)} / ${(data.ram_total_gb ?? 0).toFixed(1)} GB` },
+      ];
+      if (gpu) {
+        kpis.push({ label: 'GPU', value: `${Math.round(gpu.util ?? 0)}%`, pct: gpu.util ?? 0, color: '#22c55e', sub: escHtml(gpu.name || '') });
+        kpis.push({ label: 'VRAM', value: `${Math.round(gpu.mem_percent ?? 0)}%`, pct: gpu.mem_percent ?? 0, color: '#f59e0b', sub: `${(gpu.mem_used_gb ?? 0).toFixed(1)} / ${(gpu.mem_total_gb ?? 0).toFixed(1)} GB` });
+      }
+      if (temp) {
+        kpis.push({ label: 'Temp', value: `${temp.value.toFixed(1)}°C`, pct: clamp(temp.value, 0, 100), color: '#ef4444', sub: temp.label });
+      }
+      if (gpu?.fan_pct != null) {
+        kpis.push({ label: 'GPU Fan', value: `${gpu.fan_pct}%`, pct: gpu.fan_pct, color: '#f472b6', sub: 'GPU cooler' });
+      } else if (avgFan != null) {
+        kpis.push({ label: 'SYS Fan', value: `${avgFan.toFixed(0)}%`, pct: avgFan, color: '#22d3ee', sub: 'System avg' });
+      }
+
+      document.getElementById('dtl-kpis').innerHTML = kpis.map(k => `
+        <div class="detail-kpi-card">
+          <div class="dkpi-label">${escHtml(k.label)}</div>
+          <div class="dkpi-value" style="color:${k.color}">${escHtml(k.value)}</div>
+          <div class="dkpi-sub">${escHtml(k.sub || '')}</div>
+          <div class="dkpi-bar"><span style="width:${clamp(k.pct ?? 0, 0, 100)}%;background:${k.color}"></span></div>
+        </div>
+      `).join('');
+
+      // Sparklines
+      const sparkDefs = sparkDefinitions(data);
+      const sparkHistory = (server.history || []).slice(-SPARK_POINTS);
+      document.getElementById('dtl-sparks').innerHTML = sparkDefs.map(def => `
+        <div class="detail-spark-card">
+          <div class="shead"><span>${escHtml(def.label)}</span><strong>${escHtml(def.value)}</strong></div>
+          <canvas id="dtl-sp-${def.key}-${sid}"></canvas>
+        </div>
+      `).join('');
+
+      requestAnimationFrame(() => {
+        if (sparkHistory.length >= 2) {
+          drawSparkline(document.getElementById(`dtl-sp-cpu-${sid}`), sparkHistory.map(item => item.cpu_percent ?? 0), '#60a5fa');
+          drawSparkline(document.getElementById(`dtl-sp-ram-${sid}`), sparkHistory.map(item => item.ram_percent ?? 0), '#a78bfa');
+          if (sparkHistory.some(item => item.gpus?.length)) drawSparkline(document.getElementById(`dtl-sp-gpu-${sid}`), sparkHistory.map(item => item.gpus?.[0]?.util ?? 0), '#22c55e');
+          if (sparkHistory.some(item => getBestTemp(item))) drawSparkline(document.getElementById(`dtl-sp-temp-${sid}`), sparkHistory.map(item => getBestTemp(item)?.value ?? 0), '#f43f5e');
+        }
+      });
+
+      let history = server.history || [];
+      try { const response = await fetch(`/api/history/${encodeURIComponent(sid)}`); if (response.ok) history = await response.json(); } catch (_) {}
+      if (state.selectedServerId !== requestedSid) return;
+      if (!history.length && server.lastData) history = [server.lastData];
+
+      const labels = history.map(item => fmtTs(item.timestamp));
+      const hasGpu = history.some(item => item.gpus?.length);
+      const hasTemp = history.some(item => getBestTemp(item));
+      const hasGpuFan = history.some(item => item.gpus?.[0]?.fan_pct != null);
+      const fanKeys = [...new Set(history.flatMap(item => Object.keys(item.fan_percentages || {})))].slice(0, 6);
+      const hasSystemFanPct = fanKeys.length > 0;
+
+      const chartGrid = document.getElementById('dtl-charts');
+      const chartDefs = [
+        { id: 'cpu', title: 'CPU History', color: '#38bdf8' },
+        { id: 'ram', title: 'RAM History', color: '#a78bfa' },
+      ];
+      if (hasGpu) {
+        chartDefs.push({ id: 'gpu', title: 'GPU & VRAM', multi: true });
+      }
+      if (hasTemp) {
+        chartDefs.push({ id: 'temp', title: 'Temperature History', color: '#ef4444', unit: '°C', maxY: null });
+      }
+      if (hasGpuFan) {
+        chartDefs.push({ id: 'gpufan', title: 'GPU Fan', color: '#f472b6' });
+      }
+      if (hasSystemFanPct) {
+        chartDefs.push({ id: 'fans', title: 'Motherboard Fans', multi: true });
+      }
+
+      chartGrid.innerHTML = chartDefs.map(def => `
+        <div class="detail-chart-card"><h4>${escHtml(def.title)}</h4><canvas id="dtl-chart-${def.id}"></canvas></div>
+      `).join('');
+
+      const charts = {};
+      charts.cpu = makeChart('dtl-chart-cpu', [{ label: 'CPU', values: history.map(item => item.cpu_percent ?? 0), color: '#38bdf8' }], labels, '%', 100);
+      charts.ram = makeChart('dtl-chart-ram', [{ label: 'RAM', values: history.map(item => item.ram_percent ?? 0), color: '#a78bfa' }], labels, '%', 100);
+      if (hasGpu) {
+        charts.gpu = makeChart('dtl-chart-gpu', [
+          { label: 'GPU', values: history.map(item => item.gpus?.[0]?.util ?? 0), color: '#22c55e' },
+          { label: 'VRAM', values: history.map(item => item.gpus?.[0]?.mem_percent ?? 0), color: '#f59e0b' }
+        ], labels, '%', 100, true);
+      }
+      if (hasTemp) {
+        charts.temp = makeChart('dtl-chart-temp', [{ label: 'Temp', values: history.map(item => getBestTemp(item)?.value ?? null), color: '#ef4444' }], labels, '°C', null);
+      }
+      if (hasGpuFan) {
+        charts.gpuFan = makeChart('dtl-chart-gpufan', [{ label: 'GPU fan', values: history.map(item => item.gpus?.[0]?.fan_pct ?? null), color: '#f472b6' }], labels, '%', 100);
+      }
+      if (hasSystemFanPct) {
+        const colors = ['#22d3ee', '#60a5fa', '#34d399', '#f59e0b', '#a78bfa', '#fb7185'];
+        charts.systemFans = makeChart('dtl-chart-fans', fanKeys.map((key, index) => ({ label: prettifyLabel(key), values: history.map(item => item.fan_percentages?.[key] ?? null), color: colors[index % colors.length] })), labels, '%', 100, true);
+      }
+
+      state.detailCharts = charts;
+      state.detailFanKeys = fanKeys;
+
+      const sensorBlock = document.getElementById('dtl-sensors');
+      const fanBlock = document.getElementById('dtl-fans');
+      const temps = Object.entries(data?.temps || {});
+      const fans = Object.entries(data?.fans || {});
+      const fanPercentages = Object.entries(data?.fan_percentages || {});
+
+      if (temps.length) {
+        sensorBlock.innerHTML = `<div class="detail-sensor-card"><h4>Temperatures</h4><div class="detail-sensor-grid-inner">${temps.map(([key, value]) => `<div class="detail-sensor-item"><span class="sn">${escHtml(prettifyLabel(key))}</span><span class="sv" style="color:${tempColor(value)}">${escHtml(value)}°C</span></div>`).join('')}</div></div>`;
+      } else {
+        sensorBlock.innerHTML = '';
+      }
+
+      if (fans.length || fanPercentages.length) {
+        const mergedKeys = [...new Set([...fans.map(([key]) => key), ...fanPercentages.map(([key]) => key), ...fanKeys])];
+        const fanHtml = mergedKeys.map(key => {
+          const rpm = data.fans?.[key];
+          const pct = data.fan_percentages?.[key];
+          const rpmColor = rpm == null ? '#8da2c6' : rpm === 0 ? '#8da2c6' : rpm < 600 ? '#f59e0b' : '#60a5fa';
+          return `<div class="detail-sensor-item"><span class="sn">${escHtml(prettifyLabel(key))}</span><span class="sv" style="color:${rpm != null ? rpmColor : pctColor(pct)}">${rpm != null ? `${rpm} rpm` : ''}${rpm != null && pct != null ? ' · ' : ''}${pct != null ? `${pct}%` : ''}</span></div>`;
+        }).join('');
+        fanBlock.innerHTML = `<div class="detail-sensor-card"><h4>Fans</h4><div class="detail-sensor-grid-inner">${fanHtml}</div></div>`;
+      } else {
+        fanBlock.innerHTML = '';
+      }
+    }
+
+    // ── Live updates for detail view ──
+    function appendToDetailCharts(sid, data) {
+      if (state.selectedServerId !== sid) return;
+      if (!Object.keys(state.detailCharts).length) return;
+      const label = fmtTs(data.timestamp);
+      const push = (chart, values) => {
+        if (!chart) return;
+        chart.data.labels.push(label);
+        values.forEach((value, index) => { if (chart.data.datasets[index]) chart.data.datasets[index].data.push(value); });
+        if (chart.data.labels.length > 120) { chart.data.labels.shift(); chart.data.datasets.forEach(ds => ds.data.shift()); }
+        chart.update('none');
+      };
+      push(state.detailCharts.cpu, [data.cpu_percent ?? 0]);
+      push(state.detailCharts.ram, [data.ram_percent ?? 0]);
+      push(state.detailCharts.gpu, [data.gpus?.[0]?.util ?? 0, data.gpus?.[0]?.mem_percent ?? 0]);
+      push(state.detailCharts.temp, [getBestTemp(data)?.value ?? null]);
+      push(state.detailCharts.gpuFan, [data.gpus?.[0]?.fan_pct ?? null]);
+      if (state.detailCharts.systemFans) {
+        const chart = state.detailCharts.systemFans;
+        chart.data.labels.push(label);
+        chart.data.datasets.forEach((dataset, index) => {
+          const key = state.detailFanKeys?.[index];
+          dataset.data.push(key ? (data.fan_percentages?.[key] ?? null) : null);
+        });
+        if (chart.data.labels.length > 120) { chart.data.labels.shift(); chart.data.datasets.forEach(ds => ds.data.shift()); }
+        chart.update('none');
+      }
+
+      // Refresh sparklines in detail view
+      const history = (state.servers[sid]?.history || []).slice(-SPARK_POINTS);
+      if (history.length >= 2) {
+        drawSparkline(document.getElementById(`dtl-sp-cpu-${sid}`), history.map(item => item.cpu_percent ?? 0), '#60a5fa');
+        drawSparkline(document.getElementById(`dtl-sp-ram-${sid}`), history.map(item => item.ram_percent ?? 0), '#a78bfa');
+        if (history.some(item => item.gpus?.length)) drawSparkline(document.getElementById(`dtl-sp-gpu-${sid}`), history.map(item => item.gpus?.[0]?.util ?? 0), '#22c55e');
+        if (history.some(item => getBestTemp(item))) drawSparkline(document.getElementById(`dtl-sp-temp-${sid}`), history.map(item => getBestTemp(item)?.value ?? 0), '#f43f5e');
+      }
+
+      document.getElementById('dtl-subtitle').textContent = `ID: ${sid} · ${data.os || 'Unknown'} · ${data.cpu_cores || '?'} cores · Last seen ${timeAgo(data.timestamp)}`;
+    }
+
+    // ── Event handlers for detail view ──
+    document.getElementById('detail-back-btn').addEventListener('click', showGridView);
 
     function updateChrome() {
       const entries = Object.entries(state.servers).filter(([, server]) => server.lastData);
@@ -2051,10 +2175,7 @@
       const alerts = onlineEntries.filter(([, server]) => ['warning', 'critical'].includes(getServerSeverity(server.lastData, server.online)));
       const cpuAvg = avg(onlineEntries.map(([, server]) => server.lastData.cpu_percent ?? 0));
       const ramAvg = avg(onlineEntries.map(([, server]) => server.lastData.ram_percent ?? 0));
-      const hottest = onlineEntries
-        .map(([sid, server]) => ({ sid, temp: getBestTemp(server.lastData)?.value ?? null }))
-        .filter(item => item.temp != null)
-        .sort((a, b) => b.temp - a.temp)[0];
+      const hottest = onlineEntries.map(([sid, server]) => ({ sid, temp: getBestTemp(server.lastData)?.value ?? null })).filter(item => item.temp != null).sort((a, b) => b.temp - a.temp)[0];
       const gpuEntries = onlineEntries.filter(([, server]) => server.lastData.gpus?.length);
       const gpuAvg = gpuEntries.length ? avg(gpuEntries.map(([, server]) => server.lastData.gpus[0].util ?? 0)) : null;
       const vramAvg = gpuEntries.length ? avg(gpuEntries.map(([, server]) => server.lastData.gpus[0].mem_percent ?? 0)) : null;
@@ -2070,13 +2191,11 @@
 
       document.getElementById('kpi-cpu').textContent = `${cpuAvg.toFixed(1)}%`;
       document.getElementById('kpi-cpu-foot').textContent = `Avg across ${online} hosts`;
-      const cpuBar = document.getElementById('kpi-cpu-bar');
-      if (cpuBar) cpuBar.style.width = `${clamp(cpuAvg, 0, 100)}%`;
+      const cpuBar = document.getElementById('kpi-cpu-bar'); if (cpuBar) cpuBar.style.width = `${clamp(cpuAvg, 0, 100)}%`;
 
       document.getElementById('kpi-ram').textContent = `${ramAvg.toFixed(1)}%`;
       document.getElementById('kpi-ram-foot').textContent = `Memory pressure across fleet`;
-      const ramBar = document.getElementById('kpi-ram-bar');
-      if (ramBar) ramBar.style.width = `${clamp(ramAvg, 0, 100)}%`;
+      const ramBar = document.getElementById('kpi-ram-bar'); if (ramBar) ramBar.style.width = `${clamp(ramAvg, 0, 100)}%`;
 
       document.getElementById('kpi-temp').textContent = hottest ? `${hottest.temp.toFixed(1)}°C` : '—';
       document.getElementById('kpi-temp-foot').textContent = hottest ? `${hottest.sid} · hottest sensor` : 'No temperature data';
@@ -2098,11 +2217,11 @@
       document.getElementById('side-cpu').textContent = `${cpuAvg.toFixed(1)}%`;
       document.getElementById('side-hottest').textContent = hottest ? `${hottest.sid} · ${hottest.temp}°C` : '—';
       document.getElementById('side-last').textContent = new Date().toLocaleTimeString();
+      document.getElementById('overview-thermal').textContent = hottest ? `${hottest.sid} · ${hottest.temp.toFixed(1)}°C` : 'No temperature data yet';
+      document.getElementById('overview-load').textContent = total ? `${cpuAvg.toFixed(1)}% CPU · ${ramAvg.toFixed(1)}% RAM` : 'Waiting for telemetry';
 
-      state.kpiHistory.cpu.push(cpuAvg);
-      state.kpiHistory.ram.push(ramAvg);
-      state.kpiHistory.temp.push(hottest?.temp ?? null);
-      state.kpiHistory.gpu.push(gpuAvg ?? null);
+      state.kpiHistory.cpu.push(cpuAvg); state.kpiHistory.ram.push(ramAvg);
+      state.kpiHistory.temp.push(hottest?.temp ?? null); state.kpiHistory.gpu.push(gpuAvg ?? null);
       if (state.kpiHistory.cpu.length > 40) state.kpiHistory.cpu.shift();
       if (state.kpiHistory.ram.length > 40) state.kpiHistory.ram.shift();
       if (state.kpiHistory.temp.length > 40) state.kpiHistory.temp.shift();
@@ -2114,6 +2233,8 @@
       drawKpiSpark('kpi-gpu-spark', state.kpiHistory.gpu.filter(v => v != null), '#22c55e');
 
       updateFleetCharts();
+      updateServerList();
+      refreshCardSelection();
     }
 
     function onMetric(sid, data) {
@@ -2126,6 +2247,18 @@
       updateCard(sid, data);
       updateChrome();
       applyFilters();
+      maybeSelectInitialServer();
+      if (state.selectedServerId === sid) {
+        appendToDetailCharts(sid, data);
+        const server = state.servers[sid];
+        const temp = getBestTemp(data);
+        document.getElementById('dtl-pills').innerHTML = `
+          ${buildStatusBadge(data, server.online)}
+          ${data.gpus?.[0] ? `<span class="pill" style="font-size:0.72rem;padding:6px 10px">${escHtml(data.gpus[0].name)}</span>` : ''}
+          ${temp ? `<span class="pill" style="font-size:0.72rem;padding:6px 10px">${escHtml(temp.value.toFixed(1))}°C hotspot</span>` : ''}
+        `;
+        document.getElementById('overview-focus').textContent = data.hostname || sid;
+      }
     }
 
     function connectWS() {
@@ -2133,42 +2266,14 @@
       const proto = location.protocol === 'https:' ? 'wss' : 'ws';
       const badge = document.getElementById('ws-badge');
       let ws;
-
-      try {
-        ws = new WebSocket(`${proto}://${location.host}/ws`);
-      } catch (error) {
+      try { ws = new WebSocket(`${proto}://${location.host}/ws`); } catch (error) {
         console.error('WebSocket bootstrap failed', error);
-        badge.textContent = 'Unavailable';
-        badge.className = 'pill warn live-pill';
-        setApiStatus('Invalid origin');
-        return;
+        badge.textContent = 'Unavailable'; badge.className = 'pill warn live-pill';
+        setApiStatus('Invalid origin'); return;
       }
-
-      ws.onopen = () => {
-        badge.innerHTML = '<span class="live-dot"></span> Live';
-        badge.className = 'pill ok live-pill';
-        state.wsRetry = 0;
-        setApiStatus('HTTP OK / WS live');
-      };
-
-      ws.onmessage = event => {
-        let msg;
-        try { msg = JSON.parse(event.data); } catch (_) { return; }
-        if (msg.type === 'update') onMetric(msg.server_id, msg.data);
-      };
-
-      ws.onclose = () => {
-        badge.textContent = 'Disconnected';
-        badge.className = 'pill bad live-pill';
-        setApiStatus('HTTP OK / WS retry');
-        const delay = Math.min(1000 * Math.pow(2, state.wsRetry++), 30000);
-        setTimeout(() => {
-          badge.textContent = 'Reconnecting…';
-          badge.className = 'pill warn';
-          connectWS();
-        }, delay);
-      };
-
+      ws.onopen = () => { badge.innerHTML = '<span class="live-dot"></span> Live'; badge.className = 'pill ok live-pill'; state.wsRetry = 0; setApiStatus('HTTP OK / WS live'); };
+      ws.onmessage = event => { let msg; try { msg = JSON.parse(event.data); } catch (_) { return; } if (msg.type === 'update') onMetric(msg.server_id, msg.data); };
+      ws.onclose = () => { badge.textContent = 'Disconnected'; badge.className = 'pill bad live-pill'; setApiStatus('HTTP OK / WS retry'); const delay = Math.min(1000 * Math.pow(2, state.wsRetry++), 30000); setTimeout(() => { badge.textContent = 'Reconnecting…'; badge.className = 'pill warn'; connectWS(); }, delay); };
       ws.onerror = () => ws.close();
     }
 
@@ -2176,11 +2281,7 @@
       if (!hasDashboardOrigin()) return;
       try {
         const response = await fetch('/api/servers');
-        if (!response.ok) {
-          setApiStatus(`HTTP ${response.status}`);
-          setEmptyState('API unreachable', 'Open the dashboard through the monitor server URL, not as a standalone HTML file.');
-          return;
-        }
+        if (!response.ok) { setApiStatus(`HTTP ${response.status}`); setEmptyState('API unreachable', 'Open the dashboard through the monitor server URL, not as a standalone HTML file.'); return; }
         setApiStatus('HTTP OK');
         const servers = await response.json();
         for (const [sid, info] of Object.entries(servers)) {
@@ -2192,84 +2293,36 @@
             updateCard(sid, info.latest);
           }
         }
-        updateChrome();
-        applyFilters();
-      } catch (error) {
-        console.error('Initial fetch failed', error);
-        setApiStatus('HTTP error');
-        setEmptyState('API unreachable', 'Open the dashboard through the monitor server URL, not as a standalone HTML file.');
-      }
+        updateChrome(); applyFilters(); maybeSelectInitialServer();
+      } catch (error) { console.error('Initial fetch failed', error); setApiStatus('HTTP error'); setEmptyState('API unreachable', 'Open the dashboard through the monitor server URL, not as a standalone HTML file.'); }
     }
 
     function tick() {
       const now = Date.now() / 1000;
-
       let changed = false;
       for (const [sid, server] of Object.entries(state.servers)) {
-        const data = server.lastData;
-        if (!data) continue;
+        const data = server.lastData; if (!data) continue;
         const wasOnline = server.online;
         server.online = (now - data.timestamp) < 150;
-        const upd = document.getElementById(`upd-${sid}`);
-        if (upd) upd.textContent = timeAgo(data.timestamp);
-        if (wasOnline !== server.online) {
-          updateCard(sid, data);
-          changed = true;
+        const upd = document.getElementById(`upd-${sid}`); if (upd) upd.textContent = timeAgo(data.timestamp);
+        if (state.selectedServerId === sid) {
+          const subtitle = document.getElementById('dtl-subtitle');
+          if (subtitle) subtitle.textContent = `ID: ${sid} · ${data.os || 'Unknown'} · ${data.cpu_cores || '?'} cores · Last seen ${timeAgo(data.timestamp)}`;
         }
+        if (wasOnline !== server.online) { updateCard(sid, data); changed = true; }
       }
-
-      if (changed) {
-        updateChrome();
-        applyFilters();
-      }
+      if (changed) { updateChrome(); applyFilters(); }
     }
 
-    document.getElementById('search-input').addEventListener('input', event => {
-      state.filters.query = event.target.value || '';
-      applyFilters();
-    });
+    document.getElementById('search-input').addEventListener('input', event => { state.filters.query = event.target.value || ''; applyFilters(); });
+    document.querySelectorAll('.filter-group .filter-pill').forEach(button => { button.addEventListener('click', () => { setFilterMode(button.dataset.filter || 'all'); applyFilters(); }); });
+    document.querySelectorAll('.sort-group .filter-pill').forEach(button => { button.addEventListener('click', () => { setSortMode(button.dataset.sort || 'severity'); applyFilters(); }); });
 
-    document.querySelectorAll('.filter-group .filter-pill').forEach(button => {
-      button.addEventListener('click', () => {
-        setFilterMode(button.dataset.filter || 'all');
-        applyFilters();
-      });
-    });
+    document.getElementById('refresh-btn').addEventListener('click', () => { const btn = document.getElementById('refresh-btn'); btn.classList.add('spin'); setTimeout(() => btn.classList.remove('spin'), 700); fetchInitial(); });
 
-    document.querySelectorAll('.sort-group .filter-pill').forEach(button => {
-      button.addEventListener('click', () => {
-        setSortMode(button.dataset.sort || 'severity');
-        applyFilters();
-      });
-    });
+    if (!hasDashboardOrigin()) { setApiStatus('Invalid origin'); setEmptyState('API unreachable', 'Open the dashboard through the monitor server URL, not the raw index.html file.'); }
 
-    document.querySelectorAll('.side-nav a').forEach(link => {
-      link.addEventListener('click', () => {
-        document.querySelectorAll('.side-nav a').forEach(item => item.classList.toggle('active', item === link));
-        if (link.dataset.navFilter) {
-          setFilterMode(link.dataset.navFilter);
-          applyFilters();
-        }
-      });
-    });
-
-    document.getElementById('refresh-btn').addEventListener('click', () => {
-      const btn = document.getElementById('refresh-btn');
-      btn.classList.add('spin');
-      setTimeout(() => btn.classList.remove('spin'), 700);
-      fetchInitial();
-    });
-
-    window.toggleExpand = toggleExpand;
-
-    if (!hasDashboardOrigin()) {
-      setApiStatus('Invalid origin');
-      setEmptyState('API unreachable', 'Open the dashboard through the monitor server URL, not the raw index.html file.');
-    }
-
-    fetchInitial();
-    connectWS();
-    setInterval(tick, 1000);
+    fetchInitial(); connectWS(); setInterval(tick, 1000);
   </script>
 </body>
 </html>
