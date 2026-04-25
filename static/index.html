@@ -7,18 +7,18 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <style>
     :root {
-      --bg:        #0d1117;
-      --surface:   #161b22;
-      --border:    #30363d;
-      --text:      #e6edf3;
-      --muted:     #7d8590;
-      --green:     #3fb950;
-      --yellow:    #d29922;
-      --red:       #f85149;
-      --blue:      #58a6ff;
-      --purple:    #bc8cff;
-      --radius:    10px;
-      --card-pad:  1rem;
+      --bg:       #0d1117;
+      --surface:  #161b22;
+      --surface2: #1c2128;
+      --border:   #30363d;
+      --text:     #e6edf3;
+      --muted:    #7d8590;
+      --green:    #3fb950;
+      --yellow:   #d29922;
+      --red:      #f85149;
+      --blue:     #58a6ff;
+      --purple:   #bc8cff;
+      --radius:   10px;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -36,322 +36,224 @@
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      padding: 0.75rem 1.25rem;
+      padding: 0.65rem 1.25rem;
       background: var(--surface);
       border-bottom: 1px solid var(--border);
       position: sticky;
       top: 0;
       z-index: 100;
     }
-
     .logo {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-weight: 700;
-      font-size: 1rem;
-      color: var(--blue);
-      letter-spacing: 0.04em;
-      white-space: nowrap;
+      display: flex; align-items: center; gap: 0.4rem;
+      font-weight: 700; font-size: 1rem; color: var(--blue);
+      letter-spacing: 0.04em; white-space: nowrap;
     }
     .logo svg { width: 20px; height: 20px; }
-
     #server-count {
-      background: #1c2128;
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 0.15rem 0.55rem;
-      font-size: 0.72rem;
-      color: var(--muted);
+      background: #1c2128; border: 1px solid var(--border);
+      border-radius: 20px; padding: 0.15rem 0.55rem;
+      font-size: 0.72rem; color: var(--muted);
     }
-
     #alert-banner {
-      display: none;
-      align-items: center;
-      gap: 0.4rem;
-      background: #3d1c1c;
-      border: 1px solid #672a2a;
-      border-radius: 6px;
-      padding: 0.2rem 0.6rem;
-      font-size: 0.72rem;
-      color: var(--red);
-      font-weight: 600;
+      display: none; align-items: center; gap: 0.4rem;
+      background: #3d1c1c; border: 1px solid #672a2a;
+      border-radius: 6px; padding: 0.2rem 0.6rem;
+      font-size: 0.72rem; color: var(--red); font-weight: 600;
     }
     #alert-banner.visible { display: flex; }
-
     #clock {
       margin-left: auto;
-      font-family: 'SF Mono', 'Fira Code', monospace;
-      font-size: 0.78rem;
-      color: var(--muted);
+      font-family: 'SF Mono','Fira Code',monospace;
+      font-size: 0.78rem; color: var(--muted);
     }
-
     #ws-badge {
-      padding: 0.2rem 0.6rem;
-      border-radius: 20px;
-      font-size: 0.72rem;
-      font-weight: 600;
-      transition: all 0.3s;
+      padding: 0.2rem 0.6rem; border-radius: 20px;
+      font-size: 0.72rem; font-weight: 600; transition: all 0.3s;
     }
     #ws-badge.connected    { background: #1a4031; color: var(--green); }
     #ws-badge.disconnected { background: #3d1c1c; color: var(--red); }
     #ws-badge.connecting   { background: #2d2a1c; color: var(--yellow); }
 
-    /* ── Main grid ── */
+    /* ── Grid ── */
     main { padding: 1.25rem; }
-
     #server-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
       gap: 1rem;
     }
-
     .empty-state {
-      grid-column: 1/-1;
-      text-align: center;
-      color: var(--muted);
-      padding: 5rem 2rem;
-      font-size: 0.9rem;
-      line-height: 1.8;
+      grid-column: 1/-1; text-align: center;
+      color: var(--muted); padding: 5rem 2rem;
+      font-size: 0.9rem; line-height: 1.8;
     }
     .empty-state strong { color: var(--text); display: block; font-size: 1.1rem; margin-bottom: 0.5rem; }
 
-    /* ── Server card ── */
+    /* ── Card ── */
     .server-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: var(--card-pad);
-      cursor: pointer;
-      transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
-      user-select: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .server-card:hover {
-      border-color: var(--blue);
-      box-shadow: 0 0 0 1px #58a6ff22, 0 4px 16px rgba(0,0,0,0.4);
-      transform: translateY(-2px);
-    }
-    .server-card.offline { opacity: 0.55; }
+    .server-card.offline { opacity: 0.6; }
     .server-card.critical { border-color: #672a2a; }
 
-    .card-header {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.9rem;
-    }
+    .card-body { padding: 0.9rem 1rem 0.75rem; }
 
+    /* ── Card header ── */
+    .card-header {
+      display: flex; align-items: center; gap: 0.5rem;
+      margin-bottom: 0.8rem;
+    }
     .status-dot {
-      width: 9px; height: 9px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      transition: all 0.3s;
+      width: 9px; height: 9px; border-radius: 50%;
+      flex-shrink: 0; transition: all 0.3s;
     }
     .status-dot.online  { background: var(--green); box-shadow: 0 0 7px var(--green); }
     .status-dot.offline { background: var(--muted); }
-
     .server-name {
-      font-weight: 600;
-      font-size: 0.92rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      flex: 1;
-    }
-
-    .server-os {
-      font-size: 0.68rem;
-      color: var(--muted);
-      background: #0d1117;
-      border: 1px solid var(--border);
-      padding: 0.1rem 0.35rem;
-      border-radius: 4px;
-      white-space: nowrap;
-    }
-
-    /* ── Gauges ── */
-    .gauges {
-      display: flex;
-      justify-content: space-around;
-      gap: 0.25rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .gauge-wrap { flex: 1; max-width: 95px; min-width: 0; }
-    .gauge-wrap svg { width: 100%; height: auto; }
-
-    /* ── Footer row ── */
-    .card-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 0.72rem;
-      color: var(--muted);
-      margin-bottom: 0.55rem;
-    }
-
-    .temp-badge { font-weight: 700; font-size: 0.78rem; }
-
-    /* ── Sparklines ── */
-    .sparklines {
-      display: flex;
-      gap: 0.4rem;
-    }
-    .spark-item { flex: 1; min-width: 0; }
-    .spark-label {
-      font-size: 0.6rem;
-      color: var(--muted);
-      margin-bottom: 0.1rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-    .spark-item canvas {
-      display: block;
-      width: 100%;
-      height: 28px;
-      border-radius: 3px;
-    }
-
-    /* ── Modal ── */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.75);
-      z-index: 300;
-      align-items: flex-start;
-      justify-content: center;
-      padding: 2rem 1rem;
-      overflow-y: auto;
-    }
-    .modal-overlay.open { display: flex; }
-
-    .modal {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: calc(var(--radius) * 1.5);
-      width: 100%;
-      max-width: 820px;
-      padding: 1.5rem;
-      position: relative;
-    }
-
-    .modal-header {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid var(--border);
-    }
-    .modal-title { font-size: 1.1rem; font-weight: 700; }
-    .modal-subtitle { font-size: 0.78rem; color: var(--muted); }
-
-    .modal-close {
-      margin-left: auto;
-      background: none;
-      border: 1px solid var(--border);
-      color: var(--text);
-      width: 32px; height: 32px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 1rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: background 0.15s;
-    }
-    .modal-close:hover { background: #1c2128; }
-
-    .modal-stats {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.5rem;
-    }
-    .stat-box {
-      flex: 1;
-      min-width: 100px;
-      background: #0d1117;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.75rem;
-      text-align: center;
-    }
-    .stat-box .stat-val {
-      font-size: 1.4rem;
-      font-weight: 700;
-      font-family: 'SF Mono', 'Fira Code', monospace;
-    }
-    .stat-box .stat-lbl {
-      font-size: 0.7rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-top: 0.15rem;
-    }
-
-    .chart-section { margin-bottom: 1.5rem; }
-    .chart-section h3 {
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 0.6rem;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-    .chart-section h3::before {
-      content: '';
-      display: inline-block;
-      width: 3px;
-      height: 12px;
-      border-radius: 2px;
-      background: var(--blue);
-    }
-    .chart-wrap {
-      background: #0d1117;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.75rem 0.75rem 0.25rem;
-    }
-    .chart-wrap canvas { height: 110px !important; }
-
-    /* ── Sensor / fan tables ── */
-    .sensor-section { margin-bottom: 1.25rem; }
-    .sensor-section h3 {
-      font-size: 0.72rem; font-weight: 700; color: var(--muted);
-      text-transform: uppercase; letter-spacing: 0.08em;
-      margin-bottom: 0.5rem;
-      display: flex; align-items: center; gap: 0.4rem;
-    }
-    .sensor-section h3::before {
-      content: ''; display: inline-block;
-      width: 3px; height: 12px; border-radius: 2px;
-    }
-    .sensor-section.s-temps h3::before { background: var(--red); }
-    .sensor-section.s-fans  h3::before { background: var(--blue); }
-    .sensor-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
-      gap: 0.35rem;
-    }
-    .sensor-item {
-      background: #0d1117; border: 1px solid var(--border); border-radius: 6px;
-      padding: 0.45rem 0.65rem;
-      display: flex; align-items: center; justify-content: space-between; gap: 0.4rem;
-    }
-    .sensor-item .s-lbl {
-      font-size: 0.7rem; color: var(--muted);
+      font-weight: 600; font-size: 0.92rem;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;
     }
-    .sensor-item .s-val {
-      font-family: 'SF Mono', 'Fira Code', monospace;
-      font-size: 0.8rem; font-weight: 700; white-space: nowrap; flex-shrink: 0;
+    .server-os {
+      font-size: 0.68rem; color: var(--muted);
+      background: #0d1117; border: 1px solid var(--border);
+      padding: 0.1rem 0.35rem; border-radius: 4px; white-space: nowrap;
     }
+    .expand-btn {
+      background: none; border: 1px solid var(--border);
+      color: var(--muted); width: 24px; height: 24px;
+      border-radius: 5px; cursor: pointer; font-size: 0.65rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: color 0.15s, border-color 0.15s, transform 0.25s;
+      flex-shrink: 0;
+    }
+    .expand-btn:hover { color: var(--text); border-color: var(--blue); }
+    .expand-btn.open { transform: rotate(180deg); color: var(--blue); border-color: var(--blue); }
+
+    /* ── Gauges row ── */
+    .gauges {
+      display: flex; justify-content: space-around;
+      gap: 0.25rem; margin-bottom: 0.6rem;
+    }
+    .gauge-col { flex: 1; max-width: 100px; min-width: 0; display: flex; flex-direction: column; align-items: center; }
+    .gauge-col svg { width: 100%; height: auto; }
+    .gauge-info {
+      width: 100%; text-align: center;
+      font-size: 0.68rem; color: var(--muted);
+      margin-top: 0.15rem; line-height: 1.5;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .gauge-info .gi-main { font-weight: 600; font-size: 0.72rem; }
+
+    /* ── Fan chips ── */
+    .fans-row {
+      display: flex; flex-wrap: wrap; gap: 0.3rem;
+      margin-bottom: 0.6rem; min-height: 0;
+    }
+    .fans-row:empty { display: none; }
+    .fan-chip {
+      display: inline-flex; align-items: center; gap: 0.2rem;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 4px; padding: 0.15rem 0.45rem;
+      font-size: 0.67rem; white-space: nowrap;
+    }
+    .fan-chip .fc-label { color: var(--muted); }
+    .fan-chip .fc-val   { font-weight: 700; font-family: 'SF Mono','Fira Code',monospace; }
+
+    /* ── Sparklines ── */
+    .sparklines { display: flex; gap: 0.4rem; margin-bottom: 0.5rem; }
+    .spark-item { flex: 1; min-width: 0; }
+    .spark-label { font-size: 0.6rem; color: var(--muted); margin-bottom: 0.1rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .spark-item canvas { display: block; width: 100%; height: 28px; border-radius: 3px; }
+
+    /* ── Card meta (updated ago) ── */
+    .card-meta {
+      font-size: 0.68rem; color: var(--muted);
+      text-align: right; margin-top: 0.1rem;
+    }
+
+    /* ── Expand section ── */
+    .card-expand {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1);
+      border-top: 0px solid var(--border);
+    }
+    .card-expand.open {
+      max-height: 2000px;
+      border-top-width: 1px;
+    }
+    .expand-inner { padding: 1rem; }
+
+    /* ── Inline charts ── */
+    .echart-section { margin-bottom: 1rem; }
+    .echart-title {
+      font-size: 0.68rem; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 0.4rem;
+      display: flex; align-items: center; gap: 0.35rem;
+    }
+    .echart-title::before {
+      content: ''; display: inline-block;
+      width: 3px; height: 11px; border-radius: 2px;
+    }
+    .echart-title.t-cpu::before   { background: var(--blue); }
+    .echart-title.t-ram::before   { background: var(--purple); }
+    .echart-title.t-gpu::before   { background: var(--green); }
+    .echart-title.t-temp::before  { background: var(--red); }
+    .echart-wrap {
+      background: #0d1117; border: 1px solid var(--border);
+      border-radius: 7px; padding: 0.6rem 0.6rem 0.2rem;
+    }
+    .echart-wrap canvas { height: 80px !important; }
+
+    /* ── Sensor tables in expand ── */
+    .sensor-section { margin-top: 0.9rem; }
+    .sensor-title {
+      font-size: 0.68rem; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 0.4rem;
+      display: flex; align-items: center; gap: 0.35rem;
+    }
+    .sensor-title::before {
+      content: ''; display: inline-block; width: 3px; height: 11px; border-radius: 2px;
+    }
+    .sensor-title.s-temps::before { background: var(--red); }
+    .sensor-title.s-fans::before  { background: var(--blue); }
+    .sensor-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+      gap: 0.3rem;
+    }
+    .sensor-item {
+      background: #0d1117; border: 1px solid var(--border);
+      border-radius: 5px; padding: 0.35rem 0.55rem;
+      display: flex; align-items: center; justify-content: space-between; gap: 0.4rem;
+    }
+    .s-lbl {
+      font-size: 0.68rem; color: var(--muted);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;
+    }
+    .s-val {
+      font-family: 'SF Mono','Fira Code',monospace;
+      font-size: 0.75rem; font-weight: 700; white-space: nowrap; flex-shrink: 0;
+    }
+
+    /* ── GPU detail row in expand ── */
+    .gpu-detail {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 7px; padding: 0.65rem 0.8rem;
+      margin-bottom: 0.75rem;
+      display: flex; flex-wrap: wrap; gap: 0.6rem 1.2rem;
+    }
+    .gpu-detail .gd-name {
+      width: 100%; font-weight: 600; font-size: 0.8rem;
+      color: var(--green); margin-bottom: 0.25rem;
+    }
+    .gpu-stat { display: flex; flex-direction: column; align-items: flex-start; gap: 0.1rem; }
+    .gpu-stat .gs-val { font-family: 'SF Mono','Fira Code',monospace; font-size: 0.82rem; font-weight: 700; }
+    .gpu-stat .gs-lbl { font-size: 0.63rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
 
     /* ── Utilities ── */
     .green  { color: var(--green) !important; }
@@ -388,52 +290,54 @@
   <div id="server-grid">
     <div class="empty-state">
       <strong>En attente des agents</strong>
-      Démarrez <code>agent.py</code> sur chaque serveur à monitorer.<br>
+      Démarrez le poller ou un agent sur chaque serveur.<br>
       Les données apparaîtront ici automatiquement.
     </div>
   </div>
 </main>
-
-<!-- Detail modal -->
-<div class="modal-overlay" id="modal-overlay">
-  <div class="modal" id="modal-box">
-    <div class="modal-header">
-      <div class="status-dot" id="modal-dot"></div>
-      <div>
-        <div class="modal-title" id="modal-title">—</div>
-        <div class="modal-subtitle" id="modal-subtitle">—</div>
-      </div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
-    <div class="modal-stats" id="modal-stats"></div>
-    <div id="modal-sensors"></div>
-    <div id="modal-charts"></div>
-  </div>
-</div>
 
 <script>
 // ═══════════════════════════════════════════════════════════════════
 // Constants & state
 // ═══════════════════════════════════════════════════════════════════
 
-
-const R = 38; // SVG gauge radius
+const R = 38;
 const CIRC = 2 * Math.PI * R;
-const SPARK_POINTS = 60;  // ~30 min at 30s interval
-const HISTORY_WINDOW = 12 * 3600 * 1000; // 12h in ms
+const SPARK_POINTS = 60;
+const HISTORY_WINDOW = 12 * 3600 * 1000;
 
 const state = {
-  servers: {},      // id → { history: [], online: bool }
-  modalId: null,
-  modalCharts: [],
+  servers: {},  // sid → { history:[], online:bool, lastData, expandCharts:{cpu,ram,gpu,temp} }
   wsRetry: 0,
 };
 
 // ═══════════════════════════════════════════════════════════════════
-// Colour helpers
+// Helpers
 // ═══════════════════════════════════════════════════════════════════
 
-// ── Best temperature picker (Package > Tdie/Tctl > first available) ───────
+function pctColor(v) {
+  return v < 60 ? '#3fb950' : v < 80 ? '#d29922' : '#f85149';
+}
+function tempColor(t) {
+  return t == null ? '#7d8590' : t < 50 ? '#3fb950' : t < 70 ? '#d29922' : '#f85149';
+}
+function gpuTempColor(t) {
+  return t == null ? '#7d8590' : t < 70 ? '#3fb950' : t < 85 ? '#d29922' : '#f85149';
+}
+function pctClass(v) { return v < 60 ? 'green' : v < 80 ? 'yellow' : 'red'; }
+function timeAgo(ts) {
+  const s = Math.round(Date.now() / 1000 - ts);
+  if (s < 5)    return 'maintenant';
+  if (s < 60)   return `${s}s`;
+  if (s < 3600) return `${Math.floor(s/60)}min`;
+  return `${Math.floor(s/3600)}h`;
+}
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function fmtTs(ts) {
+  return new Date(ts * 1000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+}
 function getBestTemp(data) {
   if (data.temps && Object.keys(data.temps).length) {
     for (const [k, v] of Object.entries(data.temps))
@@ -447,200 +351,113 @@ function getBestTemp(data) {
   return null;
 }
 
-// ── Sensor / fan table in the modal ───────────────────────────────────────
-function renderModalSensors(data) {
-  const div = document.getElementById('modal-sensors');
-  if (!div || !data) return;
-  const hasTemps = data.temps && Object.keys(data.temps).length;
-  const hasFans  = data.fans  && Object.keys(data.fans).length;
-  if (!hasTemps && !hasFans) { div.innerHTML = ''; return; }
-
-  let html = '';
-  if (hasTemps) {
-    const items = Object.entries(data.temps).map(([k, v]) => {
-      const label = k.split('/').slice(1).join('/') || k;
-      return `<div class="sensor-item">
-        <span class="s-lbl" title="${escHtml(k)}">${escHtml(label)}</span>
-        <span class="s-val" style="color:${tempColor(v)}">${v}°C</span>
-      </div>`;
-    }).join('');
-    html += `<div class="sensor-section s-temps"><h3>Températures</h3>
-      <div class="sensor-grid">${items}</div></div>`;
-  }
-  if (hasFans) {
-    const items = Object.entries(data.fans).map(([k, rpm]) => {
-      const label = k.split('/').slice(1).join('/') || k;
-      const col = rpm === 0 ? 'var(--muted)' : rpm < 600 ? 'var(--yellow)' : 'var(--blue)';
-      return `<div class="sensor-item">
-        <span class="s-lbl" title="${escHtml(k)}">${escHtml(label)}</span>
-        <span class="s-val" style="color:${col}">${rpm} rpm</span>
-      </div>`;
-    }).join('');
-    html += `<div class="sensor-section s-fans"><h3>Ventilateurs</h3>
-      <div class="sensor-grid">${items}</div></div>`;
-  }
-  div.innerHTML = html;
-}
-
-function pctColor(v) {
-  return v < 60 ? '#3fb950' : v < 80 ? '#d29922' : '#f85149';
-}
-function tempColor(t) {
-  return t == null ? '#7d8590' : t < 50 ? '#3fb950' : t < 70 ? '#d29922' : '#f85149';
-}
-function gpuTempColor(t) {
-  return t == null ? '#7d8590' : t < 70 ? '#3fb950' : t < 85 ? '#d29922' : '#f85149';
-}
-function pctClass(v) {
-  return v < 60 ? 'green' : v < 80 ? 'yellow' : 'red';
-}
-function timeAgo(ts) {
-  const s = Math.round((Date.now() / 1000) - ts);
-  if (s < 5)   return 'maintenant';
-  if (s < 60)  return `${s}s`;
-  if (s < 3600) return `${Math.floor(s/60)}min`;
-  return `${Math.floor(s/3600)}h`;
-}
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
 // ═══════════════════════════════════════════════════════════════════
-// SVG gauge builder (creates once, updates in-place)
+// SVG gauge
 // ═══════════════════════════════════════════════════════════════════
 
-function buildGaugeSVG(id, label, pct, sub) {
+function buildGaugeSVG(id, label, pct) {
   const offset = CIRC * (1 - Math.min(100, Math.max(0, pct)) / 100);
   const color  = pctColor(pct);
-  return `
-    <svg viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="${R}" fill="none" stroke="#21262d" stroke-width="9"/>
-      <circle id="gc-${id}" cx="50" cy="50" r="${R}" fill="none"
-        stroke="${color}" stroke-width="9"
-        stroke-dasharray="${CIRC.toFixed(2)}"
-        stroke-dashoffset="${offset.toFixed(2)}"
-        stroke-linecap="round"
-        transform="rotate(-90 50 50)"
-        style="transition:stroke-dashoffset .6s ease,stroke .4s ease"/>
-      <text id="gtv-${id}" x="50" y="47" text-anchor="middle"
-        font-size="17" font-weight="700" fill="#e6edf3"
-        font-family="-apple-system,monospace">${Math.round(pct)}</text>
-      <text x="50" y="60" text-anchor="middle"
-        font-size="8.5" fill="#7d8590">%</text>
-      <text x="50" y="74" text-anchor="middle"
-        font-size="9" fill="#7d8590">${escHtml(label)}</text>
-      ${sub ? `<text id="gts-${id}" x="50" y="86" text-anchor="middle"
-        font-size="7.5" fill="#7d8590">${escHtml(sub)}</text>` : ''}
-    </svg>`;
+  return `<svg viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="${R}" fill="none" stroke="#21262d" stroke-width="9"/>
+    <circle id="gc-${id}" cx="50" cy="50" r="${R}" fill="none"
+      stroke="${color}" stroke-width="9"
+      stroke-dasharray="${CIRC.toFixed(2)}"
+      stroke-dashoffset="${offset.toFixed(2)}"
+      stroke-linecap="round"
+      transform="rotate(-90 50 50)"
+      style="transition:stroke-dashoffset .6s ease,stroke .4s ease"/>
+    <text id="gtv-${id}" x="50" y="50" text-anchor="middle" dominant-baseline="central"
+      font-size="18" font-weight="700" fill="#e6edf3"
+      font-family="-apple-system,monospace">${Math.round(pct)}</text>
+    <text x="50" y="68" text-anchor="middle" font-size="9" fill="#7d8590">${escHtml(label)}</text>
+  </svg>`;
 }
 
-function updateGauge(id, pct, sub) {
+function updateGauge(id, pct) {
   const circle = document.getElementById(`gc-${id}`);
   const textV  = document.getElementById(`gtv-${id}`);
-  const textS  = document.getElementById(`gts-${id}`);
   if (!circle) return;
   const offset = CIRC * (1 - Math.min(100, Math.max(0, pct)) / 100);
   circle.setAttribute('stroke-dashoffset', offset.toFixed(2));
   circle.setAttribute('stroke', pctColor(pct));
   if (textV) textV.textContent = Math.round(pct);
-  if (textS && sub) textS.textContent = sub;
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Sparkline (canvas, no library)
+// Fan chips
 // ═══════════════════════════════════════════════════════════════════
 
-function drawSparkline(canvas, values, color) {
-  if (!canvas || values.length < 2) return;
-  const dpr = window.devicePixelRatio || 1;
-  const w = canvas.offsetWidth * dpr;
-  const h = canvas.offsetHeight * dpr;
-  canvas.width  = w;
-  canvas.height = h;
-  const ctx = canvas.getContext('2d');
-
-  const xStep = w / (values.length - 1);
-  const toY = v => h - (Math.min(100, Math.max(0, v)) / 100) * (h * 0.88) - h * 0.06;
-
-  // Gradient fill
-  const grad = ctx.createLinearGradient(0, 0, 0, h);
-  grad.addColorStop(0, color + '50');
-  grad.addColorStop(1, color + '05');
-  ctx.beginPath();
-  ctx.moveTo(0, toY(values[0]));
-  for (let i = 1; i < values.length; i++) ctx.lineTo(i * xStep, toY(values[i]));
-  ctx.lineTo((values.length - 1) * xStep, h);
-  ctx.lineTo(0, h);
-  ctx.closePath();
-  ctx.fillStyle = grad;
-  ctx.fill();
-
-  // Line
-  ctx.beginPath();
-  ctx.moveTo(0, toY(values[0]));
-  for (let i = 1; i < values.length; i++) ctx.lineTo(i * xStep, toY(values[i]));
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 1.5 * dpr;
-  ctx.lineJoin = 'round';
-  ctx.stroke();
-}
-
-function refreshSparklines(sid) {
-  const hist = state.servers[sid]?.history || [];
-  const recent = hist.slice(-SPARK_POINTS);
-  if (recent.length < 2) return;
-
-  const cpuCanvas = document.getElementById(`sp-cpu-${sid}`);
-  const ramCanvas = document.getElementById(`sp-ram-${sid}`);
-  const gpuCanvas = document.getElementById(`sp-gpu-${sid}`);
-
-  drawSparkline(cpuCanvas, recent.map(d => d.cpu_percent), '#58a6ff');
-  drawSparkline(ramCanvas, recent.map(d => d.ram_percent), '#bc8cff');
-  if (gpuCanvas && recent.some(d => d.gpus?.length)) {
-    drawSparkline(gpuCanvas, recent.map(d => d.gpus?.[0]?.util ?? 0), '#3fb950');
-  }
+function buildFanChipsHTML(fans) {
+  if (!fans || !Object.keys(fans).length) return '';
+  return Object.entries(fans).map(([k, rpm]) => {
+    const label = k.split('/').slice(1).join('/') || k;
+    const col = rpm === 0 ? 'var(--muted)' : rpm < 600 ? 'var(--yellow)' : 'var(--blue)';
+    return `<span class="fan-chip">
+      <span class="fc-label">${escHtml(label)}</span>
+      <span class="fc-val" style="color:${col}">${rpm}<small style="font-weight:400;font-size:0.6rem;color:var(--muted)"> rpm</small></span>
+    </span>`;
+  }).join('');
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Card creation & update
+// Card HTML builder
 // ═══════════════════════════════════════════════════════════════════
 
 function buildCardHTML(sid, data) {
   const online  = state.servers[sid]?.online ?? true;
   const cpuPct  = data.cpu_percent ?? 0;
   const ramPct  = data.ram_percent ?? 0;
-  const ramSub  = `${(data.ram_used_gb??0).toFixed(1)}/${(data.ram_total_gb??0).toFixed(1)}G`;
-  const cpuSub  = `${data.cpu_cores ?? '?'}c`;
   const gpus    = data.gpus;
+  const hasGpu  = gpus?.length > 0;
+  const g0      = hasGpu ? gpus[0] : null;
+  const bestTemp = getBestTemp(data);
 
-  let gaugesHTML = `
-    <div class="gauge-wrap">${buildGaugeSVG(`${sid}-cpu`, 'CPU', cpuPct, cpuSub)}</div>
-    <div class="gauge-wrap">${buildGaugeSVG(`${sid}-ram`, 'RAM', ramPct, ramSub)}</div>`;
+  // Gauge sub-info
+  const cpuInfo = [
+    `<span class="gi-main">${data.cpu_cores ?? '?'} cores</span>`,
+    bestTemp
+      ? `<span style="color:${tempColor(bestTemp.val)}">${bestTemp.val}&deg;C</span>`
+      : '',
+  ].filter(Boolean).join(' &middot; ');
 
-  if (gpus?.length) {
-    const g = gpus[0];
-    const gpuSub = `${(g.mem_used_gb??0).toFixed(1)}/${(g.mem_total_gb??0).toFixed(1)}G`;
-    gaugesHTML += `<div class="gauge-wrap">${buildGaugeSVG(`${sid}-gpu`, 'GPU', g.util??0, gpuSub)}</div>`;
+  const ramInfo = `<span class="gi-main">${(data.ram_used_gb??0).toFixed(1)}<span style="font-weight:400;color:var(--muted)">/${(data.ram_total_gb??0).toFixed(1)} GB</span></span>`;
+
+  let gpuInfo = '';
+  if (g0) {
+    const parts = [`<span class="gi-main">${(g0.mem_used_gb??0).toFixed(1)}/${(g0.mem_total_gb??0).toFixed(1)} GB</span>`];
+    if (g0.temp != null) parts.push(`<span style="color:${gpuTempColor(g0.temp)}">${g0.temp}&deg;C</span>`);
+    if (g0.fan_pct != null) parts.push(`<span style="color:${pctColor(g0.fan_pct)}">${g0.fan_pct}%</span>`);
+    gpuInfo = parts.join(' &middot; ');
   }
 
-  const bestTemp = getBestTemp(data);
-  const tempHTML = bestTemp
-    ? `<span class="temp-badge" style="color:${tempColor(bestTemp.val)}" title="${escHtml(bestTemp.label)}">${bestTemp.val}°C</span>`
-    : '<span></span>';
+  let gaugesHTML = `
+    <div class="gauge-col">
+      ${buildGaugeSVG(`${sid}-cpu`, 'CPU', cpuPct)}
+      <div class="gauge-info">${cpuInfo}</div>
+    </div>
+    <div class="gauge-col">
+      ${buildGaugeSVG(`${sid}-ram`, 'RAM', ramPct)}
+      <div class="gauge-info">${ramInfo}</div>
+    </div>`;
 
-  const hasGpu = gpus?.length > 0;
+  if (g0) {
+    gaugesHTML += `
+    <div class="gauge-col">
+      ${buildGaugeSVG(`${sid}-gpu`, 'GPU', g0.util ?? 0)}
+      <div class="gauge-info">${gpuInfo}</div>
+    </div>`;
+  }
 
   return `
     <div class="card-header">
       <span class="status-dot ${online ? 'online' : 'offline'}"></span>
       <span class="server-name">${escHtml(data.hostname || sid)}</span>
       <span class="server-os">${escHtml(data.os || '?')}</span>
+      <button class="expand-btn" onclick="toggleExpand('${escHtml(sid)}')" title="Détails">&#9660;</button>
     </div>
     <div class="gauges">${gaugesHTML}</div>
-    <div class="card-footer">
-      ${tempHTML}
-      <span id="upd-${sid}" style="margin-left:auto">${timeAgo(data.timestamp)}</span>
-    </div>
+    <div class="fans-row" id="fans-${sid}">${buildFanChipsHTML(data.fans)}</div>
     <div class="sparklines">
       <div class="spark-item">
         <div class="spark-label">CPU</div>
@@ -654,20 +471,312 @@ function buildCardHTML(sid, data) {
         <div class="spark-label">GPU</div>
         <canvas id="sp-gpu-${sid}"></canvas>
       </div>` : ''}
-    </div>`;
+    </div>
+    <div class="card-meta">Mis à jour <span id="upd-${sid}">${timeAgo(data.timestamp)}</span></div>`;
 }
+
+// ═══════════════════════════════════════════════════════════════════
+// Sparklines
+// ═══════════════════════════════════════════════════════════════════
+
+function drawSparkline(canvas, values, color) {
+  if (!canvas || values.length < 2) return;
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.offsetWidth * dpr;
+  const h = canvas.offsetHeight * dpr;
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  const xStep = w / (values.length - 1);
+  const toY = v => h - (Math.min(100, Math.max(0, v)) / 100) * (h * 0.88) - h * 0.06;
+
+  const grad = ctx.createLinearGradient(0, 0, 0, h);
+  grad.addColorStop(0, color + '50'); grad.addColorStop(1, color + '05');
+  ctx.beginPath();
+  ctx.moveTo(0, toY(values[0]));
+  for (let i = 1; i < values.length; i++) ctx.lineTo(i * xStep, toY(values[i]));
+  ctx.lineTo((values.length - 1) * xStep, h);
+  ctx.lineTo(0, h); ctx.closePath();
+  ctx.fillStyle = grad; ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(0, toY(values[0]));
+  for (let i = 1; i < values.length; i++) ctx.lineTo(i * xStep, toY(values[i]));
+  ctx.strokeStyle = color; ctx.lineWidth = 1.5 * dpr;
+  ctx.lineJoin = 'round'; ctx.stroke();
+}
+
+function refreshSparklines(sid) {
+  const hist = state.servers[sid]?.history || [];
+  const recent = hist.slice(-SPARK_POINTS);
+  if (recent.length < 2) return;
+  drawSparkline(document.getElementById(`sp-cpu-${sid}`), recent.map(d => d.cpu_percent), '#58a6ff');
+  drawSparkline(document.getElementById(`sp-ram-${sid}`), recent.map(d => d.ram_percent), '#bc8cff');
+  if (recent.some(d => d.gpus?.length))
+    drawSparkline(document.getElementById(`sp-gpu-${sid}`), recent.map(d => d.gpus?.[0]?.util ?? 0), '#3fb950');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Expand section: inline Chart.js charts + sensor tables
+// ═══════════════════════════════════════════════════════════════════
+
+function CHART_OPTS(unit, maxY) {
+  return {
+    responsive: true, maintainAspectRatio: false,
+    animation: { duration: 400 },
+    interaction: { mode: 'index', intersect: false },
+    scales: {
+      x: {
+        ticks: { color: '#7d8590', font: { size: 9 }, maxTicksLimit: 7, maxRotation: 0 },
+        grid: { color: '#21262d' },
+      },
+      y: {
+        min: 0, ...(maxY ? { max: maxY } : {}),
+        ticks: {
+          color: '#7d8590', font: { size: 9 }, stepSize: maxY ? undefined : 25,
+          callback: v => v + unit,
+        },
+        grid: { color: '#21262d' },
+      },
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1c2128', borderColor: '#30363d', borderWidth: 1,
+        titleColor: '#e6edf3', bodyColor: '#7d8590',
+        callbacks: { label: c => ` ${c.dataset.label}: ${c.parsed.y.toFixed(1)}${unit}` },
+      },
+    },
+  };
+}
+
+function makeChart(canvasId, datasets, labels, unit, maxY) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return null;
+  const ctx = canvas.getContext('2d');
+  return new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: datasets.map(ds => ({
+        label: ds.label,
+        data: ds.values,
+        borderColor: ds.color,
+        backgroundColor: ds.color + '18',
+        borderWidth: 1.5,
+        pointRadius: 0,
+        fill: true,
+        tension: 0.3,
+      })),
+    },
+    options: CHART_OPTS(unit, maxY),
+  });
+}
+
+function buildExpandHTML(sid, data, hasGpu, hasTemp) {
+  const gpuName = data?.gpus?.[0]?.name || 'GPU';
+  return `
+    ${hasGpu ? `<div class="gpu-detail" id="gpu-detail-${sid}">
+      <div class="gd-name">${escHtml(gpuName)}</div>
+    </div>` : ''}
+    <div class="echart-section">
+      <div class="echart-title t-cpu">CPU %</div>
+      <div class="echart-wrap"><canvas id="ec-cpu-${sid}"></canvas></div>
+    </div>
+    <div class="echart-section">
+      <div class="echart-title t-ram">RAM %</div>
+      <div class="echart-wrap"><canvas id="ec-ram-${sid}"></canvas></div>
+    </div>
+    ${hasGpu ? `<div class="echart-section">
+      <div class="echart-title t-gpu">GPU %</div>
+      <div class="echart-wrap"><canvas id="ec-gpu-${sid}"></canvas></div>
+    </div>` : ''}
+    ${hasTemp ? `<div class="echart-section">
+      <div class="echart-title t-temp">Température CPU</div>
+      <div class="echart-wrap"><canvas id="ec-temp-${sid}"></canvas></div>
+    </div>` : ''}
+    <div id="sensors-${sid}"></div>`;
+}
+
+function renderSensors(data, container) {
+  const hasTemps = data.temps && Object.keys(data.temps).length;
+  const hasFans  = data.fans  && Object.keys(data.fans).length;
+  if (!hasTemps && !hasFans) { container.innerHTML = ''; return; }
+  let html = '';
+  if (hasTemps) {
+    const items = Object.entries(data.temps).map(([k, v]) => {
+      const label = k.split('/').slice(1).join('/') || k;
+      return `<div class="sensor-item">
+        <span class="s-lbl" title="${escHtml(k)}">${escHtml(label)}</span>
+        <span class="s-val" style="color:${tempColor(v)}">${v}&deg;C</span>
+      </div>`;
+    }).join('');
+    html += `<div class="sensor-section"><div class="sensor-title s-temps">Températures</div>
+      <div class="sensor-grid">${items}</div></div>`;
+  }
+  if (hasFans) {
+    const items = Object.entries(data.fans).map(([k, rpm]) => {
+      const label = k.split('/').slice(1).join('/') || k;
+      const col = rpm === 0 ? 'var(--muted)' : rpm < 600 ? 'var(--yellow)' : 'var(--blue)';
+      return `<div class="sensor-item">
+        <span class="s-lbl" title="${escHtml(k)}">${escHtml(label)}</span>
+        <span class="s-val" style="color:${col}">${rpm} rpm</span>
+      </div>`;
+    }).join('');
+    html += `<div class="sensor-section"><div class="sensor-title s-fans">Ventilateurs</div>
+      <div class="sensor-grid">${items}</div></div>`;
+  }
+  container.innerHTML = html;
+}
+
+function updateGpuDetail(sid, data) {
+  const el = document.getElementById(`gpu-detail-${sid}`);
+  if (!el || !data?.gpus?.length) return;
+  const g = data.gpus[0];
+  const stats = [
+    { val: `${g.util ?? 0}%`,                   cls: pctClass(g.util ?? 0),           lbl: 'Utilisation' },
+    { val: `${(g.mem_used_gb??0).toFixed(1)} / ${(g.mem_total_gb??0).toFixed(1)} GB`, cls: pctClass(g.mem_percent ?? 0), lbl: 'VRAM' },
+  ];
+  if (g.temp != null) {
+    const tc = g.temp < 70 ? 'green' : g.temp < 85 ? 'yellow' : 'red';
+    stats.push({ val: `${g.temp}°C`, cls: tc, lbl: 'Temp' });
+  }
+  if (g.fan_pct != null) {
+    stats.push({ val: `${g.fan_pct}%`, cls: pctClass(g.fan_pct), lbl: 'Fan' });
+  }
+  el.innerHTML = `<div class="gd-name">${escHtml(g.name || 'GPU')}</div>` +
+    stats.map(s => `<div class="gpu-stat"><span class="gs-val ${s.cls}">${escHtml(s.val)}</span><span class="gs-lbl">${escHtml(s.lbl)}</span></div>`).join('');
+}
+
+async function toggleExpand(sid) {
+  const card = document.getElementById(`card-${sid}`);
+  if (!card) return;
+  const expandDiv = card.querySelector('.card-expand');
+  const btn       = card.querySelector('.expand-btn');
+  const s         = state.servers[sid];
+
+  if (expandDiv.classList.contains('open')) {
+    // Collapse
+    expandDiv.classList.remove('open');
+    btn.classList.remove('open');
+    // Destroy Chart instances to free memory
+    if (s?.expandCharts) {
+      Object.values(s.expandCharts).forEach(c => c?.destroy?.());
+      s.expandCharts = null;
+    }
+    expandDiv.innerHTML = '';
+    return;
+  }
+
+  // Expand
+  expandDiv.classList.add('open');
+  btn.classList.add('open');
+
+  let history = s?.history || [];
+  try {
+    const resp = await fetch(`/api/history/${encodeURIComponent(sid)}`);
+    if (resp.ok) history = await resp.json();
+  } catch (e) { /* use local */ }
+
+  const latest  = history[history.length - 1] || s?.lastData;
+  const hasGpu  = history.some(d => d.gpus?.length);
+  const hasTemp = history.some(d => d.cpu_temp != null);
+
+  expandDiv.innerHTML = `<div class="expand-inner">${buildExpandHTML(sid, latest, hasGpu, hasTemp)}</div>`;
+
+  const labels    = history.map(d => fmtTs(d.timestamp));
+  const cpuVals   = history.map(d => d.cpu_percent ?? 0);
+  const ramVals   = history.map(d => d.ram_percent ?? 0);
+
+  const charts = {};
+  charts.cpu = makeChart(`ec-cpu-${sid}`, [{ label: 'CPU %', values: cpuVals, color: '#58a6ff' }], labels, '%', 100);
+  charts.ram = makeChart(`ec-ram-${sid}`, [{ label: 'RAM %', values: ramVals, color: '#bc8cff' }], labels, '%', 100);
+
+  if (hasGpu) {
+    const gpuVals  = history.map(d => d.gpus?.[0]?.util ?? 0);
+    const gpuMVals = history.map(d => d.gpus?.[0]?.mem_percent ?? 0);
+    const gpuOpts  = CHART_OPTS('%', 100);
+    gpuOpts.plugins.legend.display = true;
+    gpuOpts.plugins.legend.labels = { color: '#7d8590', font: { size: 9 }, boxWidth: 8 };
+    const cvs = document.getElementById(`ec-gpu-${sid}`);
+    if (cvs) {
+      charts.gpu = new Chart(cvs.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            { label: 'GPU %', data: gpuVals,  borderColor: '#3fb950', backgroundColor: '#3fb95018', borderWidth: 1.5, pointRadius: 0, fill: true, tension: 0.3 },
+            { label: 'VRAM %',data: gpuMVals, borderColor: '#d29922', backgroundColor: '#d2992218', borderWidth: 1.5, pointRadius: 0, fill: true, tension: 0.3 },
+          ],
+        },
+        options: gpuOpts,
+      });
+    }
+  }
+
+  if (hasTemp) {
+    const tempVals = history.map(d => d.cpu_temp ?? 0);
+    charts.temp = makeChart(`ec-temp-${sid}`, [{ label: '°C', values: tempVals, color: '#f85149' }], labels, '°C', null);
+  }
+
+  if (!s) state.servers[sid] = { history: [], online: true };
+  state.servers[sid].expandCharts = charts;
+
+  if (latest) {
+    renderSensors(latest, document.getElementById(`sensors-${sid}`));
+    updateGpuDetail(sid, latest);
+  }
+}
+
+// Push a new live data point into open expand charts
+function appendToExpandCharts(sid, data) {
+  const s = state.servers[sid];
+  if (!s?.expandCharts) return;
+  const label = fmtTs(data.timestamp);
+  const { cpu, ram, gpu, temp } = s.expandCharts;
+
+  function pushPoint(chart, ...values) {
+    if (!chart) return;
+    chart.data.labels.push(label);
+    values.forEach((v, i) => chart.data.datasets[i]?.data.push(v));
+    // Keep last 1440 points (12h at 30s)
+    if (chart.data.labels.length > 1440) {
+      chart.data.labels.shift();
+      chart.data.datasets.forEach(ds => ds.data.shift());
+    }
+    chart.update('none');
+  }
+
+  pushPoint(cpu, data.cpu_percent ?? 0);
+  pushPoint(ram, data.ram_percent ?? 0);
+  if (gpu) pushPoint(gpu, data.gpus?.[0]?.util ?? 0, data.gpus?.[0]?.mem_percent ?? 0);
+  if (temp && data.cpu_temp != null) pushPoint(temp, data.cpu_temp);
+
+  // Refresh sensor tables and GPU detail in the expanded view
+  const sensorsEl = document.getElementById(`sensors-${sid}`);
+  if (sensorsEl) renderSensors(data, sensorsEl);
+  updateGpuDetail(sid, data);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Card lifecycle
+// ═══════════════════════════════════════════════════════════════════
 
 function createCard(sid, data) {
   const card = document.createElement('div');
   card.id = `card-${sid}`;
   card.className = 'server-card';
-  card.dataset.sid = sid;
-  card.addEventListener('click', () => openModal(sid));
-  card.innerHTML = buildCardHTML(sid, data);
+
+  const body = document.createElement('div');
+  body.className = 'card-body';
+  body.innerHTML = buildCardHTML(sid, data);
+  card.appendChild(body);
+
+  const expand = document.createElement('div');
+  expand.className = 'card-expand';
+  card.appendChild(expand);
 
   const grid = document.getElementById('server-grid');
-  const empty = grid.querySelector('.empty-state');
-  if (empty) empty.remove();
+  grid.querySelector('.empty-state')?.remove();
   grid.appendChild(card);
 
   requestAnimationFrame(() => refreshSparklines(sid));
@@ -680,53 +789,59 @@ function updateCard(sid, data) {
   const online = state.servers[sid]?.online ?? true;
   card.className = 'server-card' + (online ? '' : ' offline');
 
-  // Gauges (smooth animated update)
-  updateGauge(`${sid}-cpu`, data.cpu_percent ?? 0, `${data.cpu_cores??'?'}c`);
-  updateGauge(`${sid}-ram`, data.ram_percent ?? 0,
-    `${(data.ram_used_gb??0).toFixed(1)}/${(data.ram_total_gb??0).toFixed(1)}G`);
-  if (data.gpus?.length) {
-    const g = data.gpus[0];
-    updateGauge(`${sid}-gpu`, g.util??0,
-      `${(g.mem_used_gb??0).toFixed(1)}/${(g.mem_total_gb??0).toFixed(1)}G`);
+  updateGauge(`${sid}-cpu`, data.cpu_percent ?? 0);
+  updateGauge(`${sid}-ram`, data.ram_percent ?? 0);
+  if (data.gpus?.length) updateGauge(`${sid}-gpu`, data.gpus[0].util ?? 0);
+
+  // Gauge info lines
+  const cols = card.querySelectorAll('.gauge-col');
+  if (cols.length >= 1) {
+    const bestTemp = getBestTemp(data);
+    const cpuInfo = [
+      `<span class="gi-main">${data.cpu_cores ?? '?'} cores</span>`,
+      bestTemp ? `<span style="color:${tempColor(bestTemp.val)}">${bestTemp.val}&deg;C</span>` : '',
+    ].filter(Boolean).join(' &middot; ');
+    const cpuInfoEl = cols[0].querySelector('.gauge-info');
+    if (cpuInfoEl) cpuInfoEl.innerHTML = cpuInfo;
+  }
+  if (cols.length >= 2) {
+    const ramInfo = `<span class="gi-main">${(data.ram_used_gb??0).toFixed(1)}<span style="font-weight:400;color:var(--muted)">/${(data.ram_total_gb??0).toFixed(1)} GB</span></span>`;
+    const ramInfoEl = cols[1].querySelector('.gauge-info');
+    if (ramInfoEl) ramInfoEl.innerHTML = ramInfo;
+  }
+  if (data.gpus?.length && cols.length >= 3) {
+    const g0 = data.gpus[0];
+    const parts = [`<span class="gi-main">${(g0.mem_used_gb??0).toFixed(1)}/${(g0.mem_total_gb??0).toFixed(1)} GB</span>`];
+    if (g0.temp != null) parts.push(`<span style="color:${gpuTempColor(g0.temp)}">${g0.temp}&deg;C</span>`);
+    if (g0.fan_pct != null) parts.push(`<span style="color:${pctColor(g0.fan_pct)}">${g0.fan_pct}%</span>`);
+    const gpuInfoEl = cols[2].querySelector('.gauge-info');
+    if (gpuInfoEl) gpuInfoEl.innerHTML = parts.join(' &middot; ');
   }
 
-  // Temperature — pick the best labeled sensor
-  const tempBadge = card.querySelector('.temp-badge');
-  if (tempBadge) {
-    const best = getBestTemp(data);
-    if (best) {
-      tempBadge.textContent = `${best.val}°C`;
-      tempBadge.style.color = tempColor(best.val);
-      tempBadge.title = best.label;
-    }
-  }
+  // Fan chips
+  const fansEl = document.getElementById(`fans-${sid}`);
+  if (fansEl) fansEl.innerHTML = buildFanChipsHTML(data.fans);
 
-  // "Updated X ago" — updated every tick by the clock
   // Sparklines
   requestAnimationFrame(() => refreshSparklines(sid));
+
+  // Push to open expand charts
+  appendToExpandCharts(sid, data);
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Incoming data handler
+// Incoming data
 // ═══════════════════════════════════════════════════════════════════
 
 function onMetric(sid, data) {
   if (!state.servers[sid]) state.servers[sid] = { history: [], online: true };
-
-  // Push to history, trim to 12h
   const cutoff = Date.now() - HISTORY_WINDOW;
   state.servers[sid].history.push(data);
-  state.servers[sid].history = state.servers[sid].history.filter(
-    d => d.timestamp * 1000 > cutoff
-  );
+  state.servers[sid].history = state.servers[sid].history.filter(d => d.timestamp * 1000 > cutoff);
   state.servers[sid].online = true;
   state.servers[sid].lastData = data;
-
   updateCard(sid, data);
   updateHeaderStats();
-
-  // Update modal live if it's showing this server
-  if (state.modalId === sid) updateModalStats(sid);
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -734,14 +849,13 @@ function onMetric(sid, data) {
 // ═══════════════════════════════════════════════════════════════════
 
 function updateHeaderStats() {
-  const count = Object.keys(state.servers).length;
+  const count  = Object.keys(state.servers).length;
   const online = Object.values(state.servers).filter(s => s.online).length;
   document.getElementById('server-count').textContent =
     `${online}/${count} serveur${count > 1 ? 's' : ''}`;
 
-  // Alert if any server is critical
   const criticals = [];
-  for (const [sid, s] of Object.entries(state.servers)) {
+  for (const [, s] of Object.entries(state.servers)) {
     if (!s.online || !s.lastData) continue;
     const d = s.lastData;
     if (d.cpu_percent > 90) criticals.push(`${d.hostname} CPU ${d.cpu_percent}%`);
@@ -758,271 +872,32 @@ function updateHeaderStats() {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Modal (12h history with Chart.js)
-// ═══════════════════════════════════════════════════════════════════
-
-function makeChartJS(canvasId, label, datasets, labels, borderColor) {
-  const ctx = document.getElementById(canvasId)?.getContext('2d');
-  if (!ctx) return null;
-
-  return new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: datasets.map((ds, i) => ({
-        label: ds.label,
-        data: ds.values,
-        borderColor: ds.color || borderColor,
-        backgroundColor: (ds.color || borderColor) + '18',
-        borderWidth: 1.5,
-        pointRadius: 0,
-        fill: true,
-        tension: 0.3,
-      })),
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: { duration: 300 },
-      interaction: { mode: 'index', intersect: false },
-      scales: {
-        x: {
-          ticks: {
-            color: '#7d8590', font: { size: 10 },
-            maxTicksLimit: 8,
-            maxRotation: 0,
-          },
-          grid: { color: '#21262d' },
-        },
-        y: {
-          min: 0, max: 100,
-          ticks: { color: '#7d8590', font: { size: 10 }, stepSize: 25,
-            callback: v => v + '%' },
-          grid: { color: '#21262d' },
-        },
-      },
-      plugins: {
-        legend: {
-          display: datasets.length > 1,
-          labels: { color: '#7d8590', font: { size: 10 }, boxWidth: 10 },
-        },
-        tooltip: {
-          backgroundColor: '#1c2128',
-          borderColor: '#30363d',
-          borderWidth: 1,
-          titleColor: '#e6edf3',
-          bodyColor: '#7d8590',
-          callbacks: {
-            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)}%`,
-          },
-        },
-      },
-    },
-  });
-}
-
-function fmtTs(ts) {
-  const d = new Date(ts * 1000);
-  return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-}
-
-async function openModal(sid) {
-  state.modalId = sid;
-  const overlay = document.getElementById('modal-overlay');
-  overlay.classList.add('open');
-
-  // Destroy previous charts
-  state.modalCharts.forEach(c => c.destroy());
-  state.modalCharts = [];
-
-  const s = state.servers[sid];
-  const dot = document.getElementById('modal-dot');
-  dot.className = `status-dot ${s?.online ? 'online' : 'offline'}`;
-
-  // Try to fetch full 12h history from server (fallback to local cache)
-  let history = s?.history || [];
-  try {
-    const resp = await fetch(`/api/history/${encodeURIComponent(sid)}`);
-    if (resp.ok) history = await resp.json();
-  } catch (e) { /* use local */ }
-
-  const latest = history[history.length - 1] || s?.lastData;
-  document.getElementById('modal-title').textContent = latest?.hostname || sid;
-  document.getElementById('modal-subtitle').textContent =
-    `${latest?.os || '?'} · ${latest?.cpu_cores ?? '?'} cœurs · ${(latest?.ram_total_gb??0).toFixed(0)} GB RAM` +
-    (latest?.gpus?.length ? ` · GPU: ${latest.gpus[0].name}` : '');
-
-  updateModalStats(sid, latest);
-  renderModalSensors(latest);
-
-  const labels = history.map(d => fmtTs(d.timestamp));
-  const cpuVals  = history.map(d => d.cpu_percent ?? 0);
-  const ramVals  = history.map(d => d.ram_percent ?? 0);
-  const hasGpu   = history.some(d => d.gpus?.length);
-  const hasTemp  = history.some(d => d.cpu_temp != null);
-
-  const chartsDiv = document.getElementById('modal-charts');
-  chartsDiv.innerHTML = `
-    <div class="chart-section">
-      <h3>CPU</h3>
-      <div class="chart-wrap"><canvas id="mc-cpu"></canvas></div>
-    </div>
-    <div class="chart-section">
-      <h3>RAM</h3>
-      <div class="chart-wrap"><canvas id="mc-ram"></canvas></div>
-    </div>
-    ${hasGpu ? `<div class="chart-section">
-      <h3>GPU</h3>
-      <div class="chart-wrap"><canvas id="mc-gpu"></canvas></div>
-    </div>` : ''}
-    ${hasTemp ? `<div class="chart-section">
-      <h3>Température CPU</h3>
-      <div class="chart-wrap"><canvas id="mc-temp"></canvas></div>
-    </div>` : ''}`;
-
-  const c1 = makeChartJS('mc-cpu', 'CPU', [{ label: 'CPU %', values: cpuVals, color: '#58a6ff' }], labels);
-  const c2 = makeChartJS('mc-ram', 'RAM', [{ label: 'RAM %', values: ramVals, color: '#bc8cff' }], labels);
-  if (c1) state.modalCharts.push(c1);
-  if (c2) state.modalCharts.push(c2);
-
-  if (hasGpu) {
-    const gpuVals = history.map(d => d.gpus?.[0]?.util ?? 0);
-    const gpuMemVals = history.map(d => d.gpus?.[0]?.mem_percent ?? 0);
-    const c3 = makeChartJS('mc-gpu', 'GPU', [
-      { label: 'GPU %', values: gpuVals, color: '#3fb950' },
-      { label: 'VRAM %', values: gpuMemVals, color: '#d29922' },
-    ], labels);
-    if (c3) state.modalCharts.push(c3);
-  }
-
-  if (hasTemp) {
-    const tempVals = history.map(d => d.cpu_temp ?? 0);
-    // Temp chart with custom Y axis (override 0-100 to 0-120 °C)
-    const ctx = document.getElementById('mc-temp')?.getContext('2d');
-    if (ctx) {
-      const c4 = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [{
-            label: '°C',
-            data: tempVals,
-            borderColor: '#f85149',
-            backgroundColor: '#f8514920',
-            borderWidth: 1.5,
-            pointRadius: 0,
-            fill: true,
-            tension: 0.3,
-          }],
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          animation: { duration: 300 },
-          interaction: { mode: 'index', intersect: false },
-          scales: {
-            x: { ticks: { color: '#7d8590', font:{size:10}, maxTicksLimit:8, maxRotation:0 }, grid:{color:'#21262d'} },
-            y: { min: 0, ticks: { color:'#7d8590', font:{size:10}, callback: v => v+'°C' }, grid:{color:'#21262d'} },
-          },
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              backgroundColor:'#1c2128', borderColor:'#30363d', borderWidth:1,
-              titleColor:'#e6edf3', bodyColor:'#7d8590',
-              callbacks: { label: c => ` ${c.parsed.y.toFixed(1)}°C` },
-            },
-          },
-        },
-      });
-      state.modalCharts.push(c4);
-    }
-  }
-}
-
-function updateModalStats(sid, data) {
-  data = data || state.servers[sid]?.lastData;
-  if (!data) return;
-  const statsDiv = document.getElementById('modal-stats');
-  if (!statsDiv) return;
-
-  const best = getBestTemp(data);
-  const boxes = [
-    { val: `${data.cpu_percent??0}%`, lbl: 'CPU', cls: pctClass(data.cpu_percent??0) },
-    { val: `${data.ram_percent??0}%`, lbl: `RAM (${(data.ram_used_gb??0).toFixed(1)}/${(data.ram_total_gb??0).toFixed(1)} GB)`, cls: pctClass(data.ram_percent??0) },
-  ];
-  if (best) {
-    const tc = best.val < 50 ? 'green' : best.val < 70 ? 'yellow' : 'red';
-    boxes.push({ val: `${best.val}°C`, lbl: best.label, cls: tc });
-  }
-  if (data.gpus?.length) {
-    const g = data.gpus[0];
-    boxes.push({ val: `${g.util??0}%`, lbl: `GPU (${g.name??'GPU'})`, cls: pctClass(g.util??0) });
-    if (g.temp != null) {
-      const gc = g.temp < 70 ? 'green' : g.temp < 85 ? 'yellow' : 'red';
-      boxes.push({ val: `${g.temp}°C`, lbl: 'Temp GPU', cls: gc });
-    }
-    if (g.fan_pct != null) {
-      const fc = g.fan_pct < 50 ? 'green' : g.fan_pct < 80 ? 'yellow' : 'red';
-      boxes.push({ val: `${g.fan_pct}%`, lbl: 'Fan GPU', cls: fc });
-    }
-  }
-
-  statsDiv.innerHTML = boxes.map(b => `
-    <div class="stat-box">
-      <div class="stat-val ${b.cls}">${escHtml(b.val)}</div>
-      <div class="stat-lbl">${escHtml(b.lbl)}</div>
-    </div>`).join('');
-
-  // Live-update sensor table in case data arrived after modal was opened
-  renderModalSensors(data);
-}
-
-function closeModal() {
-  document.getElementById('modal-overlay').classList.remove('open');
-  state.modalId = null;
-}
-
-document.getElementById('modal-overlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('modal-overlay')) closeModal();
-});
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-
-// ═══════════════════════════════════════════════════════════════════
 // WebSocket
 // ═══════════════════════════════════════════════════════════════════
 
 function connectWS() {
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-  const ws = new WebSocket(`${proto}://${location.host}/ws`);
+  const ws    = new WebSocket(`${proto}://${location.host}/ws`);
   const badge = document.getElementById('ws-badge');
 
   ws.onopen = () => {
-    badge.textContent = 'Connecté';
-    badge.className = 'connected';
+    badge.textContent = 'Connecté'; badge.className = 'connected';
     state.wsRetry = 0;
   };
-
   ws.onmessage = e => {
-    let msg;
-    try { msg = JSON.parse(e.data); } catch { return; }
+    let msg; try { msg = JSON.parse(e.data); } catch { return; }
     if (msg.type === 'update') onMetric(msg.server_id, msg.data);
   };
-
   ws.onclose = () => {
-    badge.textContent = 'Déconnecté';
-    badge.className = 'disconnected';
+    badge.textContent = 'Déconnecté'; badge.className = 'disconnected';
     const delay = Math.min(1000 * Math.pow(2, state.wsRetry++), 30000);
-    setTimeout(() => {
-      badge.textContent = 'Reconnexion…';
-      badge.className = 'connecting';
-      connectWS();
-    }, delay);
+    setTimeout(() => { badge.textContent = 'Reconnexion…'; badge.className = 'connecting'; connectWS(); }, delay);
   };
-
   ws.onerror = () => ws.close();
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Initial fetch (catch up before WS fires)
+// Initial fetch
 // ═══════════════════════════════════════════════════════════════════
 
 async function fetchInitial() {
@@ -1033,54 +908,36 @@ async function fetchInitial() {
     for (const [sid, info] of Object.entries(servers)) {
       if (!state.servers[sid]) state.servers[sid] = { history: [], online: info.online };
       state.servers[sid].online = info.online;
-      if (info.latest) {
-        state.servers[sid].lastData = info.latest;
-        updateCard(sid, info.latest);
-      }
+      if (info.latest) { state.servers[sid].lastData = info.latest; updateCard(sid, info.latest); }
     }
     updateHeaderStats();
-  } catch (e) { /* server not ready yet */ }
+  } catch (e) { /* not ready */ }
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Clock + offline detection tick (every second)
+// Clock + offline tick
 // ═══════════════════════════════════════════════════════════════════
 
 function tick() {
-  // Update clock
-  document.getElementById('clock').textContent =
-    new Date().toLocaleTimeString('fr-FR');
-
-  // Update "X ago" labels and offline status
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('fr-FR');
   const now = Date.now() / 1000;
   for (const [sid, s] of Object.entries(state.servers)) {
-    const d = s.lastData;
-    if (!d) continue;
-
-    const age = now - d.timestamp;
+    const d = s.lastData; if (!d) continue;
     const wasOnline = s.online;
-    s.online = age < 120;
-
+    s.online = (now - d.timestamp) < 150;
     const updEl = document.getElementById(`upd-${sid}`);
     if (updEl) updEl.textContent = timeAgo(d.timestamp);
-
     if (wasOnline !== s.online) {
       const card = document.getElementById(`card-${sid}`);
       if (card) {
         card.classList.toggle('offline', !s.online);
         const dot = card.querySelector('.status-dot');
-        if (dot) {
-          dot.className = `status-dot ${s.online ? 'online' : 'offline'}`;
-        }
+        if (dot) dot.className = `status-dot ${s.online ? 'online' : 'offline'}`;
       }
       updateHeaderStats();
     }
   }
 }
-
-// ═══════════════════════════════════════════════════════════════════
-// Bootstrap
-// ═══════════════════════════════════════════════════════════════════
 
 fetchInitial();
 connectWS();
